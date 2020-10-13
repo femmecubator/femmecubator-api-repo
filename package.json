@@ -4,8 +4,8 @@
   "description": "Node.js backend for Femmecubator",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "start-debug": "nodemon app.js",
+    "start": "node ./server/app.js",
+    "start-debug": "nodemon ./server/app.js",
     "test": "jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
     "eslint:fix": "eslint --fix \"**/*.*\""
   },
@@ -37,7 +37,9 @@
   },
   "homepage": "https://github.com/cfernando415/femmecubator-api-repo#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "connect-timeout": "^1.9.0",
+    "express": "^4.17.1",
+    "http-status-codes": "^2.1.4"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
