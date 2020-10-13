@@ -1,0 +1,22 @@
+{
+  "name": "femmecubator-api-repo",
+  "version": "1.0.0",
+  "description": "Node.js backend for Femmecubator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cfernando415/femmecubator-api-repo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cfernando415/femmecubator-api-repo/issues"
+  },
+  "homepage": "https://github.com/cfernando415/femmecubator-api-repo#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
