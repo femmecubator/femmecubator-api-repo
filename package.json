@@ -18,5 +18,14 @@
   "homepage": "https://github.com/cfernando415/femmecubator-api-repo#readme",
   "dependencies": {
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "eslint": "^7.11.0",
+    "jest": "^26.5.3",
+    "jest-junit": "^12.0.0",
+    "nodemon": "^2.0.5",
+    "prettier": "^2.1.2",
+    "run-p": "0.0.0"
   }
 }
