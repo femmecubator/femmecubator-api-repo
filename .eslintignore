@@ -15,4 +15,5 @@ test.js
 README.md
 package-lock.json
 package.json
+*.test.js
 .eslintrc.json
