@@ -8,7 +8,7 @@ const server = {
     mode: 'production',
     target: 'node',
     output: {
-        path: path.resolve(__dirname, 'build'),
+        path: path.join(__dirname, 'build'),
         filename: 'server.js'
     },
     module: {
