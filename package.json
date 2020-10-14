@@ -4,7 +4,7 @@
   "description": "Node.js backend for Femmecubator",
   "main": "app.js",
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack",
+    "build": "webpack --mode production",
     "clean": "rm -rf build",
     "start": "node ./build/server.js",
     "start-debug": "nodemon ./server/app.js",
