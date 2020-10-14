@@ -1,8 +1,0 @@
-applications:
-  - name: femmecubator-api
-  buildpack: nodejs_buildpack_current
-  command: node server.js
-  path: .
-  memory: 512MB
-    env:
-      PORT: "env.PORT"
