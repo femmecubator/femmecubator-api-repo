@@ -21,14 +21,8 @@
         }
       }
     ],
-    "indent": [
-      "error",
-      4,
-      {
-        "SwitchCase": 1
-      }
-    ],
-    "linebreak-style": ["error", "windows"],
+    "indent": "off",
+    "linebreak-style": 0,
     "no-cond-assign": ["error", "always"],
     "no-console": ["warn"],
     "no-undef-init": ["error"],
