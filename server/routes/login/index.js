@@ -11,14 +11,11 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   // not using password right now
   // will put logic in middleware later
   // stub login api that responds with a cookie value
-  const optionsValue = process.env.NODE_ENV === 'development' ? false : true;
   const { userName } = req.body;
   const payload = { userName, alias: 'Jane D.' };
   const options = {
     maxAge: 86400,
     path: '/',
-    httpOnly: optionsValue,
-    secure: optionsValue,
     domain: 'femmecubator.com',
     sameSite: 'lax',
   };
