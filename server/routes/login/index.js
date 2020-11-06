@@ -4,15 +4,8 @@ const router = express.Router();
 const { TIMEOUT, HttpStatusCodes } = require('../../utils/constants');
 const JWT = require('jsonwebtoken');
 const { uuid } = require('uuidv4');
-const cors = require('cors');
 
 router.use(express.json());
-// router.use(
-//   cors({
-//     credentials: true,
-//     origin: '.femmecubator.com',
-//   })
-// );
 
 router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   // not using password right now
