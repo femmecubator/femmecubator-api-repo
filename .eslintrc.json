@@ -5,6 +5,11 @@
     "commonjs": true,
     "jest": true
   },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    },
   "extends": "eslint:recommended",
   "globals": {
     "Atomics": "readonly",
