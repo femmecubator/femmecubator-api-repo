@@ -3,6 +3,8 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.SECRET_KEY);
 const MongoClient = require('mongodb').MongoClient;
 
+console.log('cryptr: ', cryptr);
+
 const commonMenuMiddleware = {
   getMenuItems: (req, res) => {
     const uri = cryptr.decrypt(process.env.MONGO_DB_URL);
