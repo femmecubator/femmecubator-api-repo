@@ -4,27 +4,18 @@ const router = express.Router();
 const { TIMEOUT, HttpStatusCodes } = require('../../utils/constants');
 const JWT = require('jsonwebtoken');
 const { uuid } = require('uuidv4');
-const cors = require('cors');
 
 router.use(express.json());
-router.use(
-  cors({
-    credentials: true,
-    origin: '.femmecubator.com',
-  })
-);
 
 router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   // not using password right now
   // will put logic in middleware later
   // stub login api that responds with a cookie value
-  const { userName, alias } = req.body;
-  const payload = { userName, alias };
+  const { userName } = req.body;
+  const payload = { userName, alias: 'Jane D.' };
   const options = {
     maxAge: 86400,
-    // httpOnly: true,
     domain: 'femmecubator.com',
-    sameSite: 'Lax',
     // secure: true
   };
   const token = JWT.sign(payload, process.env.SECRET_KEY);

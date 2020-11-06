@@ -46,7 +46,6 @@
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.5",
     "copy-webpack-plugin": "^6.2.1",
-    "cors": "^2.8.5",
     "cross-env": "^7.0.2",
     "cryptr": "^6.0.2",
     "express": "^4.17.1",
