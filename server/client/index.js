@@ -2,10 +2,7 @@ const express = require('express');
 const greetingRoutes = require('../routes/greetings');
 const commonMenuRoutes = require('../routes/common-menu');
 const encryptRoutes = require('../routes/encrypt');
-<<<<<<< HEAD
-=======
 const loginRoutes = require('../routes/login');
->>>>>>> development
 
 module.exports = () => {
   const app = express();
