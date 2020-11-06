@@ -7,7 +7,7 @@
     "build": "webpack --mode production",
     "clean": "rm -rf build",
     "start": "node ./build/server.js",
-    "start-debug": "nodemon ./server/app.js",
+    "start-debug": "NODE_ENV=development nodemon ./server/app.js",
     "test": "jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
     "eslint:fix": "eslint --fix \"**/*.*\""
   },
