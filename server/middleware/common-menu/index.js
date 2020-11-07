@@ -13,7 +13,7 @@ const commonMenuMiddleware = {
       setLogDetails(
         'commonMenuMiddleware.getMenuItems',
         'Fetching common menu data',
-        `Menu ID Params - ${role_id}`
+        `Role ID - ${role_id}`
       )
     );
 
