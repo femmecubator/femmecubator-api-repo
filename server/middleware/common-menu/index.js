@@ -4,15 +4,16 @@ const cryptr = new Cryptr(process.env.SECRET_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails } = require('../../utils/constants');
+const { _ } = require('lodash');
 
 const commonMenuMiddleware = {
   getMenuItems: (req, res) => {
-    const { menu_id } = res.locals.user;
+    const { role_id } = res.locals.user;
     logger.info(
       setLogDetails(
         'commonMenuMiddleware.getMenuItems',
         'Fetching common menu data',
-        `Menu ID Params - ${menu_id}`
+        `Menu ID Params - ${role_id}`
       )
     );
 
@@ -36,15 +37,16 @@ const commonMenuMiddleware = {
         try {
           data = await db
             .collection('common-menu')
-            .findOne(
-              { menu_id: parseInt(menu_id) },
-              { projection: { _id: 0 } }
-            );
-          if (!data) throw new Error('Data not found');
+            .findOne({ role_id }, { projection: { _id: 0 } });
+          if (!data) {
+            status = HttpStatusCodes.StatusCodes.NOT_FOUND;
+            throw new Error('Data not found');
+          }
         } catch (err) {
           status = HttpStatusCodes.StatusCodes.BAD_REQUEST;
-          if (!data) status = HttpStatusCodes.StatusCodes.NOT_FOUND;
-          data = 'Some error happened!';
+          data = _.isEmpty(err)
+            ? { err: 'Failure to retrieve common menu data' }
+            : err;
         } finally {
           client.close();
           const { userName } = res.locals.user;
