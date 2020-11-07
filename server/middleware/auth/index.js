@@ -1,6 +1,6 @@
 const JWT = require('jsonwebtoken');
 const logger = require('simple-node-logger').createSimpleLogger();
-const { setLogDetails } = require('../../utils/constants');
+const { setLogDetails, HttpStatusCodes } = require('../../utils/constants');
 
 const authMiddleware = {
   validateCookie: (req, res, next) => {
@@ -39,7 +39,7 @@ const authMiddleware = {
       logger.error(
         setLogDetails('authMiddleware.errorHandler', 'FAILURE', err)
       );
-      res.status(403).send(err);
+      res.status(HttpStatusCodes.StatusCodes.FORBIDDEN).send(err);
     }
     next();
   },
