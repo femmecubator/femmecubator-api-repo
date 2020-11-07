@@ -8,7 +8,8 @@
     "clean": "rm -rf build",
     "start": "node ./build/server.js",
     "start-debug": "NODE_ENV=development nodemon ./server/app.js",
-    "test": "jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
+    "test": "jest --watch --runInBand --detectOpenHandles",
+    "test:coverage": "jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests --runInBand --detectOpenHandles",
     "eslint:fix": "eslint --fix \"**/*.*\""
   },
   "jest": {
