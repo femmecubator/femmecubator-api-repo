@@ -1,23 +1,48 @@
 const JWT = require('jsonwebtoken');
+const logger = require('simple-node-logger').createSimpleLogger();
+const { setLogDetails } = require('../../utils/constants');
+
 const authMiddleware = {
   validateCookie: (req, res, next) => {
-    // start logging
+    logger.info(
+      setLogDetails(
+        'authMiddleware.validateCookie',
+        'Validating Cookie',
+        req.cookies
+      )
+    );
     const token = req.cookies.TOKEN;
-    try {
-      const { userName, alias, menu_id } = JWT.verify(
-        token,
-        process.env.SECRET_KEY
-      );
-      res.locals.user = { userName, alias, menu_id };
-      next();
-    } catch (err) {
-      next(err);
+    if (token) {
+      try {
+        const { userName, alias, menu_id } = JWT.verify(
+          token,
+          process.env.SECRET_KEY
+        );
+        res.locals.user = { userName, alias, menu_id };
+        logger.info(
+          setLogDetails(
+            'authMiddleware.validateCookie',
+            'SUCCESS',
+            res.locals.user
+          )
+        );
+        next();
+      } catch (err) {
+        next(err);
+      }
+    } else {
+      next('Token Not Found');
     }
   },
   errorHandler: (err, req, res, next) => {
-    if (err) res.status(403).send(err);
+    if (err) {
+      logger.error(
+        setLogDetails('authMiddleware.errorHandler', 'FAILURE', err)
+      );
+      res.status(403).send(err);
+    }
     next();
   },
 };
 
-module.exports = [authMiddleware.validateCookie, authMiddleware.errorHandler];
+module.exports = authMiddleware;
