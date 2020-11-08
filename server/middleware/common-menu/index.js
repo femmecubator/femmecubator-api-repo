@@ -26,11 +26,6 @@ const commonMenuMiddleware = {
         useUnifiedTopology: true,
       },
       async function (err, client) {
-        /*if (err) {
-          console.error(err);
-          return;
-        }*/
-
         let data;
         try {
           const db = client.db('femmecubatorDB');
