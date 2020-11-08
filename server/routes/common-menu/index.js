@@ -7,7 +7,7 @@ const authMiddleware = require('../../middleware/auth');
 
 router.get(
   '/',
-  //   timeout(TIMEOUT, { respond: true }),
+  timeout(TIMEOUT, { respond: true }),
   authMiddleware.validateCookie,
   authMiddleware.errorHandler,
   commonMenuMiddleware.getMenuItems

@@ -11,8 +11,16 @@ jest.mock('cryptr', () => {
   });
 });
 
+jest.mock('simple-node-logger'.createSimpleLogger, () => {
+  return jest.fn().mockImplementation(() => {
+    return {
+      info: jest.fn(() => {}),
+    };
+  });
+});
+
 describe('common-menu middleware', () => {
-  it('should return common menu API', () => {
+  it('should return common menu API', async () => {
     const request = httpMocks.createRequest({
       method: 'GET',
       url: 'api/common-menu',
@@ -20,8 +28,16 @@ describe('common-menu middleware', () => {
 
     const mongoClientSpy = jest.spyOn(MongoClient, 'connect');
 
-    const response = httpMocks.createResponse();
-    commonMenuMiddleware.getMenuItems(request, response);
+    const response = httpMocks.createResponse({
+      locals: {
+        user: {
+          userId: 'jane_d@gmail.com',
+          userName: 'Jane D.',
+          role_id: 1,
+        },
+      },
+    });
+    await commonMenuMiddleware.getMenuItems(request, response);
     expect(mongoClientSpy).toHaveBeenCalled();
   });
 });
