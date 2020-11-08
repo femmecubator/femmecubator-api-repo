@@ -3,12 +3,12 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.SECRET_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const logger = require('simple-node-logger').createSimpleLogger();
-const { setLogDetails } = require('../../utils/constants');
+const { setLogDetails, DataException } = require('../../utils/constants');
 const { _ } = require('lodash');
 
 const commonMenuMiddleware = {
   getMenuItems: (req, res) => {
-    const { role_id } = res.locals.user;
+    const { role_id, userName } = res.locals.user;
     logger.info(
       setLogDetails(
         'commonMenuMiddleware.getMenuItems',
@@ -26,31 +26,32 @@ const commonMenuMiddleware = {
         useUnifiedTopology: true,
       },
       async function (err, client) {
-        if (err) {
+        /*if (err) {
           console.error(err);
           return;
-        }
+        }*/
 
-        const db = client.db('femmecubatorDB');
         let data;
-        let status = HttpStatusCodes.StatusCodes.OK;
         try {
+          const db = client.db('femmecubatorDB');
           data = await db
             .collection('common-menu')
             .findOne({ role_id }, { projection: { _id: 0 } });
+          res.status(HttpStatusCodes.StatusCodes.OK);
           if (!data) {
-            status = HttpStatusCodes.StatusCodes.NOT_FOUND;
-            throw new Error('Data not found');
+            res.status(HttpStatusCodes.StatusCodes.NOT_FOUND);
+            throw DataException('Data not found');
+          } else {
+            data = { ...data, userName };
           }
-        } catch (err) {
-          status = HttpStatusCodes.StatusCodes.BAD_REQUEST;
-          data = _.isEmpty(err)
-            ? { err: 'Failure to retrieve common menu data' }
-            : err;
+        } catch ({ message }) {
+          if (res.status !== HttpStatusCodes.StatusCodes.NOT_FOUND)
+            res.status(HttpStatusCodes.StatusCodes.BAD_REQUEST);
+          if (!client) res.status(HttpStatusCodes.StatusCodes.GATEWAY_TIMEOUT);
+          data = { message };
         } finally {
-          client.close();
-          const { userName } = res.locals.user;
-          res.status(status).json({ ...data, userName });
+          if (client) client.close();
+          res.send(data);
         }
       }
     );

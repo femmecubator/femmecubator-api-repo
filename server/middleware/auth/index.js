@@ -31,18 +31,18 @@ const authMiddleware = {
         next(err);
       }
     } else {
-      next({ err: 'Token Not Found' });
+      next({ message: 'Token Not Found' });
     }
   },
-  errorHandler: (err, req, res, next) => {
-    if (err) {
+  errorHandler: (message, req, res, next) => {
+    if (message) {
       logger.error(
-        setLogDetails('authMiddleware.errorHandler', 'FAILURE', err)
+        setLogDetails('authMiddleware.errorHandler', 'FAILURE', message)
       );
       res.setHeader('Content-Type', 'application/json');
       return res
-        .status(HttpStatusCodes.StatusCodes.FORBIDDEN)
-        .end(JSON.stringify(err));
+        .status(HttpStatusCodes.StatusCodes.UNAUTHORIZED)
+        .end(JSON.stringify(message));
     }
     next();
   },
