@@ -1,5 +1,6 @@
 const commonMenuMiddleware = require('./index');
 const httpMocks = require('node-mocks-http');
+const { MockMongoClient } = require('./__mocks__/mockMongoClient');
 const MongoClient = require('mongodb').MongoClient;
 
 const mockPlainText =
@@ -19,25 +20,69 @@ jest.mock('simple-node-logger'.createSimpleLogger, () => {
   });
 });
 
+jest.mock('mongodb');
+
 describe('common-menu middleware', () => {
-  it('should return common menu API', async () => {
-    const request = httpMocks.createRequest({
+  let request;
+  beforeEach(() => {
+    jest.spyOn(MockMongoClient, 'connect');
+    request = httpMocks.createRequest({
       method: 'GET',
       url: 'api/common-menu',
     });
-
-    const mongoClientSpy = jest.spyOn(MongoClient, 'connect');
-
+  });
+  it('should return common menu API', async () => {
     const response = httpMocks.createResponse({
       locals: {
         user: {
           userId: 'jane_d@gmail.com',
           userName: 'Jane D.',
-          role_id: 1,
+          role_id: 1000,
         },
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(mongoClientSpy).toHaveBeenCalled();
+    expect(MockMongoClient.connect).toHaveBeenCalled();
+  }, 30000);
+  it('should throw an exception', async () => {
+    const response = httpMocks.createResponse({
+      locals: {
+        user: {
+          userId: 'jane_d@gmail.com',
+          userName: 'Jane D.',
+          role_id: 1001,
+        },
+      },
+    });
+    await commonMenuMiddleware.getMenuItems(request, response);
+    expect(MockMongoClient.connect).toHaveBeenCalled();
+  });
+
+  it('should return statusCode BAD_REQUEST', async () => {
+    const response = httpMocks.createResponse({
+      locals: {
+        user: {
+          userId: 'jane_d@gmail.com',
+          userName: 'Jane D.',
+          role_id: 1002,
+        },
+      },
+    });
+    await commonMenuMiddleware.getMenuItems(request, response);
+    expect(MockMongoClient.connect).toHaveBeenCalled();
+  });
+
+  it('should return statusCode GATEWAY_TIMEOUT', async () => {
+    const response = httpMocks.createResponse({
+      locals: {
+        user: {
+          userId: 'jane_d@gmail.com',
+          userName: 'Jane D.',
+          role_id: 1003,
+        },
+      },
+    });
+    await commonMenuMiddleware.getMenuItems(request, response);
+    expect(MockMongoClient.connect).toHaveBeenCalled();
   });
 });
