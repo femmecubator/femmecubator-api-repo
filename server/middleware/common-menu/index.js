@@ -4,7 +4,6 @@ const cryptr = new Cryptr(process.env.SECRET_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails, DataException } = require('../../utils/constants');
-const { _ } = require('lodash');
 
 const commonMenuMiddleware = {
   getMenuItems: (req, res) => {
