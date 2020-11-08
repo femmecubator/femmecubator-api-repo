@@ -14,6 +14,17 @@
   },
   "jest": {
     "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.{js,jsx}",
+      "!**/*.config.js",
+      "!**/build/**",
+      "!**/output/**",
+      "!**/server/app.js",
+      "!**/server/client/**",
+      "!**/server/routes/**",
+      "!**/node_modules/**",
+      "!**/vendor/**"
+    ],
     "coverageReporters": [
       "text",
       "html",
