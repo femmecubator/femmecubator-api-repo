@@ -1,5 +1,4 @@
 const Cryptr = require('cryptr');
-const cryptr = new Cryptr(process.env.SECRET_KEY);
 const MongoClient = require('mongodb').MongoClient;
 const { MockMongoClient } = require('./__mocks__/mockMongoClient');
 const logger = require('simple-node-logger').createSimpleLogger();
@@ -8,6 +7,7 @@ const {
   setLogDetails,
   DataException,
 } = require('../../utils/constants');
+const mongoUtil = require('../../utils/mongoUtil');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -15,7 +15,7 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const commonMenuService = async (uri, role_id, userName) => {
+const commonMenuService = async (role_id, userName) => {
   let data;
   let statusCode;
   let message;
@@ -23,12 +23,13 @@ const commonMenuService = async (uri, role_id, userName) => {
   try {
     mongoClient =
       role_id === 1000 || role_id === 1001 ? MockMongoClient : MongoClient;
-    client = await mongoClient.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    const db = client.db('femmecubatorDB');
+
+    client = await mongoUtil.connectToServer(mongoClient);
+
+    const db = mongoUtil.getDb();
+
     const collectionObj = db.collection('common-menu');
+
     data = await collectionObj.findOne({ role_id }, { projection: { _id: 0 } });
     if (!data) {
       statusCode = StatusCodes.NOT_FOUND;
@@ -59,12 +60,7 @@ const commonMenuMiddleware = {
         `Role ID - ${role_id}`
       )
     );
-    const uri = cryptr.decrypt(process.env.MONGO_DB_URL);
-    const { statusCode, ...rest } = await commonMenuService(
-      uri,
-      role_id,
-      userName
-    );
+    const { statusCode, ...rest } = await commonMenuService(role_id, userName);
     res.status(statusCode).send(rest);
   },
 };
