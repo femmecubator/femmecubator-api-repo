@@ -24,17 +24,15 @@ const mockData = {
   ],
 };
 
-var _db;
+const _db = {
+  collection: function () {
+    return collectionObj;
+  },
+};
 
 const mockMongoUtil = {
-  connectToServer: async function () {
-    Promise.resolve(
-      (_db = {
-        collection: function () {
-          return collectionObj;
-        },
-      })
-    );
+  connectToServer: function () {
+    return true;
   },
   getDb: function () {
     return _db;
@@ -47,4 +45,4 @@ const collectionObj = {
   },
 };
 
-module.exports = { mockMongoUtil };
+module.exports = mockMongoUtil;

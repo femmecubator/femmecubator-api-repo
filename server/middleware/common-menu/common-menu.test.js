@@ -1,8 +1,8 @@
 const commonMenuMiddleware = require('./index');
 const httpMocks = require('node-mocks-http');
-const { MockMongoClient } = require('./__mocks__/mockMongoClient');
-const { mockMongoUtil } = require('./__mocks__/mockMongoUtil');
-const MongoClient = require('mongodb').MongoClient;
+// const { MockMongoClient } = require('./__mocks__/mockMongoClient');
+const mockMongoUtil = require('../../utils/__mocks__/mockMongoUtil');
+// const MongoClient = require('mongodb').MongoClient;
 
 jest.mock('cryptr', () => {
   const mockPlainText =
