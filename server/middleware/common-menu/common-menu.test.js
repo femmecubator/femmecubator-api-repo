@@ -1,12 +1,12 @@
 const commonMenuMiddleware = require('./index');
 const httpMocks = require('node-mocks-http');
 const { MockMongoClient } = require('./__mocks__/mockMongoClient');
+const { mockMongoUtil } = require('./__mocks__/mockMongoUtil');
 const MongoClient = require('mongodb').MongoClient;
 
-const mockPlainText =
-  'mongodb://fakeUser:fakePassword@mongodb.fakeDomain.com:27017/fakeDb';
-
 jest.mock('cryptr', () => {
+  const mockPlainText =
+    'mongodb://fakeUser:fakePassword@mongodb.fakeDomain.com:27017/fakeDb';
   return jest.fn().mockImplementation(() => {
     return { decrypt: () => mockPlainText };
   });
@@ -25,7 +25,8 @@ jest.mock('mongodb');
 describe('common-menu middleware', () => {
   let request;
   beforeEach(() => {
-    jest.spyOn(MockMongoClient, 'connect');
+    jest.spyOn(mockMongoUtil, 'connectToServer');
+
     request = httpMocks.createRequest({
       method: 'GET',
       url: 'api/common-menu',
@@ -42,7 +43,7 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(MockMongoClient.connect).toHaveBeenCalled();
+    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
   }, 30000);
   it('should throw an exception', async () => {
     const response = httpMocks.createResponse({
@@ -55,7 +56,7 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(MockMongoClient.connect).toHaveBeenCalled();
+    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
   });
 
   it('should return statusCode BAD_REQUEST', async () => {
@@ -69,7 +70,7 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(MockMongoClient.connect).toHaveBeenCalled();
+    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
   });
 
   it('should return statusCode GATEWAY_TIMEOUT', async () => {
@@ -83,6 +84,6 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(MockMongoClient.connect).toHaveBeenCalled();
+    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
   });
 });

@@ -8,6 +8,7 @@ const {
   DataException,
 } = require('../../utils/constants');
 const mongoUtil = require('../../utils/mongoUtil');
+const mockMongoUtil = require('./__mocks__/mockMongoUtil');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -21,12 +22,15 @@ const commonMenuService = async (role_id, userName) => {
   let message;
   let client;
   try {
-    mongoClient =
-      role_id === 1000 || role_id === 1001 ? MockMongoClient : MongoClient;
+    // mongoClient =
+    //   role_id === 1000 || role_id === 1001 ? MockMongoClient : MongoClient;
 
-    client = await mongoUtil.connectToServer(mongoClient);
+    let mongo =
+      role_id === 1000 || role_id === 1001 ? mongoUtil : mockMongoUtil;
 
-    const db = mongoUtil.getDb();
+    client = await mongo.connectToServer();
+
+    const db = mongo.getDb();
 
     const collectionObj = db.collection('common-menu');
 
