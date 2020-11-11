@@ -3,7 +3,7 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.SECRET_KEY);
 const url = cryptr.decrypt(process.env.MONGO_DB_URL);
 
-var _db;
+let _db;
 
 module.exports = {
   connectToServer: function (mongoClient = MongoClient) {

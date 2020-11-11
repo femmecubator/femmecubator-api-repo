@@ -22,9 +22,6 @@ const commonMenuService = async (role_id, userName) => {
   let message;
   let client;
   try {
-    // mongoClient =
-    //   role_id === 1000 || role_id === 1001 ? MockMongoClient : MongoClient;
-
     let mongo = role_id >= 1000 ? mockMongoUtil : mongoUtil;
 
     client = await mongo.connectToServer();
@@ -49,7 +46,6 @@ const commonMenuService = async (role_id, userName) => {
     if (!client || role_id === 1003) statusCode = StatusCodes.GATEWAY_TIMEOUT;
     message = err.message;
   } finally {
-    // client.close();
     return resObj(statusCode, message, data);
   }
 };

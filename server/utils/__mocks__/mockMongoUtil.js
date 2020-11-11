@@ -30,9 +30,17 @@ const _db = {
   },
 };
 
+const mongoClient = {
+  connect: function () {
+    return (err, client) => {
+      return true;
+    };
+  },
+};
+
 const mockMongoUtil = {
   connectToServer: function () {
-    return true;
+    return mongoClient.connect();
   },
   getDb: function () {
     return _db;
