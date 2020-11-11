@@ -23,7 +23,7 @@ jest.mock('mongodb');
 describe('common-menu middleware', () => {
   let request;
   beforeEach(() => {
-    jest.spyOn(mockMongoUtil, 'connectToServer');
+    jest.spyOn(mockMongoUtil, 'fetchCollection');
 
     request = httpMocks.createRequest({
       method: 'GET',
@@ -41,7 +41,7 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
+    expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   }, 30000);
   it('should throw an exception', async () => {
     const response = httpMocks.createResponse({
@@ -54,7 +54,7 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
+    expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   });
 
   it('should return statusCode BAD_REQUEST', async () => {
@@ -68,7 +68,7 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
+    expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   });
 
   it('should return statusCode GATEWAY_TIMEOUT', async () => {
@@ -82,6 +82,6 @@ describe('common-menu middleware', () => {
       },
     });
     await commonMenuMiddleware.getMenuItems(request, response);
-    expect(mockMongoUtil.connectToServer).toHaveBeenCalled();
+    expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   });
 });

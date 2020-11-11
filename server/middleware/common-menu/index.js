@@ -20,15 +20,10 @@ const commonMenuService = async (role_id, userName) => {
   let data;
   let statusCode;
   let message;
-  let client;
   try {
     let mongo = role_id >= 1000 ? mockMongoUtil : mongoUtil;
 
-    client = await mongo.connectToServer();
-
-    const db = mongo.getDb();
-
-    const collectionObj = db.collection('common-menu');
+    const collectionObj = await mongo.fetchCollection('common-menu');
 
     data = await collectionObj.findOne({ role_id }, { projection: { _id: 0 } });
     if (!data) {
@@ -43,7 +38,8 @@ const commonMenuService = async (role_id, userName) => {
   } catch (err) {
     if (statusCode !== StatusCodes.NOT_FOUND || role_id === 1002)
       statusCode = StatusCodes.BAD_REQUEST;
-    if (!client || role_id === 1003) statusCode = StatusCodes.GATEWAY_TIMEOUT;
+    if (!collectionObj || role_id === 1003)
+      statusCode = StatusCodes.GATEWAY_TIMEOUT;
     message = err.message;
   } finally {
     return resObj(statusCode, message, data);

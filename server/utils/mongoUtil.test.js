@@ -1,4 +1,7 @@
-const { connectToServer, getDb } = require('./mongoUtil');
+const {
+  MockMongoClient,
+} = require('../middleware/common-menu/__mocks__/mockMongoClient');
+const { fetchCollection } = require('./mongoUtil');
 
 jest.mock('mongodb');
 
@@ -10,20 +13,12 @@ jest.mock('cryptr', () => {
   });
 });
 
-let _db;
-
 describe('mongoUtil', () => {
-  test('connectToServer() should call mongoDB connect()', async () => {
-    const mongoClient = {
-      connect: jest.fn(() => true),
-    };
+  test('fetchCollection() should call MongoClient.connect()', async () => {
+    jest.spyOn(MockMongoClient, 'connect');
 
-    await connectToServer(mongoClient);
-    expect(mongoClient.connect).toHaveBeenCalled();
-  });
+    await fetchCollection('common-menu');
 
-  test('getDb() should return _db', () => {
-    let result = getDb();
-    expect(result).toBe(_db);
+    expect(MockMongoClient.connect).toHaveBeenCalled();
   });
 });
