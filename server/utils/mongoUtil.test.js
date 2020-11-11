@@ -15,6 +15,8 @@ jest.mock('cryptr', () => {
 
 describe('mongoUtil', () => {
   test('fetchCollection() should call MongoClient.connect()', async () => {
+    // process.env.MOCK_TEST = 'true';
+
     jest.spyOn(MockMongoClient, 'connect');
 
     await fetchCollection('common-menu');

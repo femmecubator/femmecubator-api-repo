@@ -8,8 +8,8 @@
     "clean": "rm -rf build",
     "start": "node ./build/server.js",
     "start-debug": "NODE_ENV=development nodemon ./server/app.js",
-    "test": "MOCK_TEST=true jest --watch",
-    "test:coverage": "MOCK_TEST=true jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
+    "test": "cross-env MOCK_TEST=true jest --watch",
+    "test:coverage": "cross-env MOCK_TEST=true jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
     "eslint:fix": "eslint --fix \"**/*.*\""
   },
   "jest": {
@@ -58,7 +58,6 @@
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.5",
     "copy-webpack-plugin": "^6.2.1",
-    "cross-env": "^7.0.2",
     "cryptr": "^6.0.2",
     "express": "^4.17.1",
     "http-status-codes": "^2.1.4",
@@ -71,6 +70,7 @@
     "webpack-cli": "^4.0.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "eslint": "^7.11.0",
     "jest": "^26.5.3",
