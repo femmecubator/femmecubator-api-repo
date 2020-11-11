@@ -8,8 +8,8 @@
     "clean": "rm -rf build",
     "start": "node ./build/server.js",
     "start-debug": "NODE_ENV=development nodemon ./server/app.js",
-    "test": "MOCK_TEST=true jest --watch",
-    "test:coverage": "MOCK_TEST=true jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
+    "test": "cross-env MOCK_TEST=true jest --watch",
+    "test:coverage": "cross-env MOCK_TEST=true jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
     "eslint:fix": "eslint --fix \"**/*.*\""
   },
   "jest": {
