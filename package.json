@@ -8,11 +8,23 @@
     "clean": "rm -rf build",
     "start": "node ./build/server.js",
     "start-debug": "NODE_ENV=development nodemon ./server/app.js",
-    "test": "jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
+    "test": "cross-env MOCK_TEST=true jest --watch",
+    "test:coverage": "cross-env MOCK_TEST=true jest --coverage --coverageDirectory=output/coverage/jest --passWithNoTests",
     "eslint:fix": "eslint --fix \"**/*.*\""
   },
   "jest": {
     "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.{js,jsx}",
+      "!**/*.config.js",
+      "!**/build/**",
+      "!**/output/**",
+      "!**/server/app.js",
+      "!**/server/client/**",
+      "!**/server/routes/**",
+      "!**/node_modules/**",
+      "!**/vendor/**"
+    ],
     "coverageReporters": [
       "text",
       "html",
@@ -46,11 +58,11 @@
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.5",
     "copy-webpack-plugin": "^6.2.1",
-    "cross-env": "^7.0.2",
     "cryptr": "^6.0.2",
     "express": "^4.17.1",
     "http-status-codes": "^2.1.4",
     "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.2",
     "nodemon-webpack-plugin": "^4.3.2",
     "simple-node-logger": "^18.12.24",
     "uuidv4": "^6.2.5",
@@ -58,6 +70,7 @@
     "webpack-cli": "^4.0.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "eslint": "^7.11.0",
     "jest": "^26.5.3",

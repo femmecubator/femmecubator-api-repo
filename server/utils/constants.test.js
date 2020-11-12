@@ -1,4 +1,3 @@
-const { EXPECTATION_FAILED } = require('http-status-codes');
 const defaultTimeout = '90000';
 const overriddenTimeout = '50000';
 const defaultPort = '3001';

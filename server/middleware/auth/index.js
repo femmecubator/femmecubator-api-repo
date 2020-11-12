@@ -14,11 +14,11 @@ const authMiddleware = {
     const token = req.cookies.TOKEN;
     if (token) {
       try {
-        const { userName, alias, menu_id } = JWT.verify(
+        const { userId, userName, role_id } = JWT.verify(
           token,
           process.env.SECRET_KEY
         );
-        res.locals.user = { userName, alias, menu_id };
+        res.locals.user = { userId, userName, role_id };
         logger.info(
           setLogDetails(
             'authMiddleware.validateCookie',
@@ -31,15 +31,18 @@ const authMiddleware = {
         next(err);
       }
     } else {
-      next('Token Not Found');
+      next({ message: 'Token Not Found' });
     }
   },
-  errorHandler: (err, req, res, next) => {
-    if (err) {
+  errorHandler: (message, req, res, next) => {
+    if (message) {
       logger.error(
-        setLogDetails('authMiddleware.errorHandler', 'FAILURE', err)
+        setLogDetails('authMiddleware.errorHandler', 'FAILURE', message)
       );
-      res.status(HttpStatusCodes.StatusCodes.FORBIDDEN).send(err);
+      res.setHeader('Content-Type', 'application/json');
+      return res
+        .status(HttpStatusCodes.StatusCodes.UNAUTHORIZED)
+        .end(JSON.stringify(message));
     }
     next();
   },

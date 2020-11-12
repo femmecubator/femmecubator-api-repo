@@ -9,4 +9,5 @@ module.exports = {
     Message: shortMessage,
     Details: details,
   }),
+  DataException: (message) => ({ message }),
 };
