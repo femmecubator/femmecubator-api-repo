@@ -33,12 +33,35 @@ const commonMenuService = async (role_id, userName) => {
       data = { ...data, userName };
     }
   } catch (err) {
-    if (statusCode !== StatusCodes.NOT_FOUND || role_id === 1002)
+    if (statusCode !== StatusCodes.NOT_FOUND || role_id === 1002) {
+      logger.error(
+        setLogDetails(
+          'commonMenuMiddleware.commonMenuService',
+          'Failed to fetch common menu data',
+          `Role ID - ${role_id}`
+        )
+      );
       statusCode = StatusCodes.BAD_REQUEST;
-    if (!collectionObj || role_id === 1003)
+    }
+    if (!collectionObj || role_id === 1003) {
+      logger.error(
+        setLogDetails(
+          'commonMenuMiddleware.commonMenuService',
+          'Connection timed out while fetching common menu data',
+          `Role ID - ${role_id}`
+        )
+      );
       statusCode = StatusCodes.GATEWAY_TIMEOUT;
+    }
     message = err.message;
   } finally {
+    logger.info(
+      setLogDetails(
+        'commonMenuMiddleware.commonMenuService',
+        'End of commonMenuService',
+        `Role ID - ${role_id}`
+      )
+    );
     return resObj(statusCode, message, data);
   }
 };
