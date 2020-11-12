@@ -17,9 +17,7 @@ module.exports = {
     });
 
     const db = client.db('femmecubatorDB');
-
     const collectionObj = db.collection(collectionName);
-
     return collectionObj;
   },
 };

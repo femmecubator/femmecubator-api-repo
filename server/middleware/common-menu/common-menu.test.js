@@ -1,6 +1,8 @@
 const commonMenuMiddleware = require('./index');
 const httpMocks = require('node-mocks-http');
-const mockMongoUtil = require('../../utils/__mocks__/mockMongoUtil');
+const mockMongoUtil = require('../../utils/mongoUtil');
+
+jest.mock('../../utils/mongoUtil');
 
 jest.mock('cryptr', () => {
   const mockPlainText =
@@ -23,8 +25,7 @@ jest.mock('mongodb');
 describe('common-menu middleware', () => {
   let request;
   beforeEach(() => {
-    jest.spyOn(mockMongoUtil, 'fetchCollection');
-
+    mockMongoUtil.fetchCollection.mockImplementationOnce(jest.fn());
     request = httpMocks.createRequest({
       method: 'GET',
       url: 'api/common-menu',

@@ -1,8 +1,6 @@
-const {
-  MockMongoClient,
-} = require('../middleware/common-menu/__mocks__/mockMongoClient');
+const httpMocks = require('node-mocks-http');
 const { fetchCollection } = require('./mongoUtil');
-
+const commonMenuMiddleware = require('../middleware/common-menu');
 jest.mock('mongodb');
 
 jest.mock('cryptr', () => {
@@ -13,14 +11,29 @@ jest.mock('cryptr', () => {
   });
 });
 
+jest.mock('./mongoUtil');
+
 describe('mongoUtil', () => {
   test('fetchCollection() should call MongoClient.connect()', async () => {
-    // process.env.MOCK_TEST = 'true';
+    fetchCollection.mockImplementationOnce(jest.fn());
 
-    jest.spyOn(MockMongoClient, 'connect');
+    const request = httpMocks.createRequest({
+      method: 'GET',
+      url: 'api/common-menu',
+    });
 
-    await fetchCollection('common-menu');
+    const response = httpMocks.createResponse({
+      locals: {
+        user: {
+          userId: 'jane_d@gmail.com',
+          userName: 'Jane D.',
+          role_id: 1000,
+        },
+      },
+    });
 
-    expect(MockMongoClient.connect).toHaveBeenCalled();
+    await commonMenuMiddleware.getMenuItems(request, response);
+
+    expect(fetchCollection).toHaveBeenCalled();
   });
 });

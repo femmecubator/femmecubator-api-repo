@@ -8,7 +8,6 @@ const {
   DataException,
 } = require('../../utils/constants');
 const mongoUtil = require('../../utils/mongoUtil');
-const mockMongoUtil = require('../../utils/__mocks__/mockMongoUtil');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -21,9 +20,7 @@ const commonMenuService = async (role_id, userName) => {
   let statusCode;
   let message;
   try {
-    let mongo = role_id >= 1000 ? mockMongoUtil : mongoUtil;
-
-    const collectionObj = await mongo.fetchCollection('common-menu');
+    const collectionObj = await mongoUtil.fetchCollection('common-menu');
 
     data = await collectionObj.findOne({ role_id }, { projection: { _id: 0 } });
     if (!data) {

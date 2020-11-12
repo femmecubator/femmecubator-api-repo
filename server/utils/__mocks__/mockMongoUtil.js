@@ -24,31 +24,10 @@ const mockData = {
   ],
 };
 
-// const _db = {
-//   collection: function () {
-//     return collectionObj;
-//   },
-// };
-
-// const mongoClient = {
-//   connect: function () {
-//     return (err, client) => {
-//       return true;
-//     };
-//   },
-// };
-
 const mockMongoUtil = {
   fetchCollection: function () {
     return collectionObj;
   },
-
-  // connectToServer: function () {
-  //   return mongoClient.connect();
-  // },
-  // getDb: function () {
-  //   return _db;
-  // },
 };
 
 const collectionObj = {
