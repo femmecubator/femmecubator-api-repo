@@ -4,7 +4,7 @@ const { PORT } = require('./utils/constants');
 const logger = require('simple-node-logger').createSimpleLogger();
 
 app.server = app().listen(PORT, () => {
-  console.info(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });
 
 module.exports = app;

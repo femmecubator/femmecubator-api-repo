@@ -19,7 +19,7 @@ const authMiddleware = {
           process.env.SECRET_KEY
         );
         res.locals.user = { userId, userName, role_id };
-        console.info(
+        logger.info(
           setLogDetails(
             'authMiddleware.validateCookie',
             'SUCCESS',
@@ -36,7 +36,7 @@ const authMiddleware = {
   },
   errorHandler: (message, req, res, next) => {
     if (message) {
-      console.error(
+      logger.error(
         setLogDetails('authMiddleware.errorHandler', 'FAILURE', message)
       );
       res.setHeader('Content-Type', 'application/json');
