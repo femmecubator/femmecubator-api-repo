@@ -46,7 +46,7 @@ const commonMenuService = async (role_id, userName) => {
 const commonMenuMiddleware = {
   getMenuItems: async (req, res) => {
     const { role_id, userName } = res.locals.user;
-    logger.info(
+    console.info(
       setLogDetails(
         'commonMenuMiddleware.getMenuItems',
         'Fetching common menu data',
