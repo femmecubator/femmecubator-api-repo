@@ -15,7 +15,7 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const commonMenuService = async (role_id, userName) => {
+const commonMenuService = async (role_id, userName, title) => {
   let data;
   let statusCode;
   let message;
@@ -30,7 +30,7 @@ const commonMenuService = async (role_id, userName) => {
     } else {
       statusCode = StatusCodes.OK;
       message = 'Success';
-      data = { ...data, userName };
+      data = { ...data, userName, title };
     }
   } catch (err) {
     if (statusCode !== StatusCodes.NOT_FOUND || role_id === 1002) {
@@ -68,7 +68,7 @@ const commonMenuService = async (role_id, userName) => {
 
 const commonMenuMiddleware = {
   getMenuItems: async (req, res) => {
-    const { role_id, userName } = res.locals.user;
+    const { role_id, userName, title } = res.locals.user;
     logger.info(
       setLogDetails(
         'commonMenuMiddleware.getMenuItems',
@@ -76,7 +76,11 @@ const commonMenuMiddleware = {
         `Role ID - ${role_id}`
       )
     );
-    const { statusCode, ...rest } = await commonMenuService(role_id, userName);
+    const { statusCode, ...rest } = await commonMenuService(
+      role_id,
+      userName,
+      title
+    );
     res.status(statusCode).send(rest);
   },
 };
