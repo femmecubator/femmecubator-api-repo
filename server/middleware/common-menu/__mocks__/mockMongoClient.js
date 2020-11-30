@@ -25,7 +25,7 @@ const mockData = {
 };
 
 const MockMongoClient = {
-  connect: async function (uri, options) {
+  connect: async function (_uri, _options) {
     const client = {
       db: mockDb,
       close: () => {},
