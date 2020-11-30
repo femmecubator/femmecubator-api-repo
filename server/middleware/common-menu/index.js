@@ -1,6 +1,3 @@
-const Cryptr = require('cryptr');
-const MongoClient = require('mongodb').MongoClient;
-const { MockMongoClient } = require('./__mocks__/mockMongoClient');
 const logger = require('simple-node-logger').createSimpleLogger();
 const {
   HttpStatusCodes: { StatusCodes },
@@ -19,8 +16,9 @@ const commonMenuService = async (role_id, userName) => {
   let data;
   let statusCode;
   let message;
+  let collectionObj;
   try {
-    const collectionObj = await mongoUtil.fetchCollection('common-menu');
+    collectionObj = await mongoUtil.fetchCollection('common-menu');
 
     data = await collectionObj.findOne({ role_id }, { projection: { _id: 0 } });
     if (!data) {
@@ -62,8 +60,8 @@ const commonMenuService = async (role_id, userName) => {
         `Role ID - ${role_id}`
       )
     );
-    return resObj(statusCode, message, data);
   }
+  return resObj(statusCode, message, data);
 };
 
 const commonMenuMiddleware = {
