@@ -21,7 +21,7 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   const token = JWT.sign(payload, process.env.SECRET_KEY);
 
   res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', '.femmecubator.com');
+  res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN);
   res.header(
     'Access-Control-Allow-Methods',
     'GET,PUT,POST,DELETE,UPDATE,OPTIONS'
