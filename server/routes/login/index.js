@@ -20,17 +20,6 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   };
   const token = JWT.sign(payload, process.env.SECRET_KEY);
 
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN);
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET,PUT,POST,DELETE,UPDATE,OPTIONS'
-  );
-  res.header(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
-  );
-
   res.cookie('TOKEN', token, options);
   res.cookie('SESSIONID', uuid(), options);
   res.status(HttpStatusCodes.StatusCodes.OK).end();
