@@ -20,7 +20,10 @@ const commonMenuService = async (role_id, userName) => {
   try {
     collectionObj = await mongoUtil.fetchCollection('common-menu');
 
-    data = await collectionObj.findOne({ role_id }, { projection: { _id: 0 } });
+    data = await collectionObj.findOne(
+      { role_id },
+      { projection: { _id: 0, address: 0 } }
+    );
     if (!data) {
       statusCode = StatusCodes.NOT_FOUND;
       data = 'No Record Found';
