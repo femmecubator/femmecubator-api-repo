@@ -4,18 +4,26 @@ const commonMenuRoutes = require('../routes/common-menu');
 const encryptRoutes = require('../routes/encrypt');
 const loginRoutes = require('../routes/login');
 const cookieParser = require('cookie-parser');
-const cors = require('cors');
+const { CORS_ORIGINS } = require('../utils/constants');
 
-const corsOptions = {
-  allRoutes: true,
-  origin: process.env.CORS_ORIGIN,
-  credentials: true,
-  methods: 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
-  headers: 'content-type',
-};
+function corsHandler(req, res, next) {
+  const { origin } = req.headers;
+  if (CORS_ORIGINS.includes(origin))
+    res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header(
+    'Access-Control-Allow-Methods',
+    'GET,PUT,POST,DELETE,UPDATE,OPTIONS'
+  );
+  res.header(
+    'Access-Control-Allow-Headers',
+    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
+  );
+  return next();
+}
 module.exports = () => {
   const app = express();
-  app.use(cors(corsOptions));
+  app.use(corsHandler);
   app.use(cookieParser());
   app.use('/api/greetings', greetingRoutes);
   app.use('/api/commonMenu', commonMenuRoutes);

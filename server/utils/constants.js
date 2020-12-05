@@ -10,4 +10,9 @@ module.exports = {
     Details: details,
   }),
   DataException: (message) => ({ message }),
+  CORS_ORIGINS: [
+    'http://local.femmecubator.com:3000',
+    'https://femmecubator.com',
+    'https://www.femmecubator.com',
+  ],
 };
