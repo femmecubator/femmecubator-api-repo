@@ -12,7 +12,12 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   // will put logic in middleware later
   // stub login api that responds with a cookie value
   const { userId } = req.body;
-  const payload = { userId, userName: 'Jane D.', role_id: 1 };
+  const payload = {
+    userId,
+    userName: 'Jane D.',
+    role_id: 1,
+    title: 'UX Designer',
+  };
   const options = {
     maxAge: 86400,
     path: '/',
