@@ -10,13 +10,16 @@ router.use(express.json());
 router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   // will put logic in middleware later
   // stub login api that responds with a cookie value
-  const { email, userName } = req.body;
-  const payload = {
+  const {
+    firstName,
+    lastName,
+    prefLoc,
+    title,
     email,
-    userName: 'jane.doe',
-    role_id: 1,
-    title: 'Software Engineer',
-  };
+    userName,
+    password,
+  } = req.body;
+  const payload = { email, userName, role_id: 1, title };
   const cookieExp = new Date(Date.now() + 8 * 3600000);
   const options = {
     expires: cookieExp,
