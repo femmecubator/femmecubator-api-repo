@@ -20,7 +20,7 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   };
   const cookieExp = new Date(Date.now() + 8 * 3600000);
   const options = {
-    maxAge: cookieExp,
+    expires: cookieExp,
     path: '/',
     domain: 'femmecubator.com',
   };
