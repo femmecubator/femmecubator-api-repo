@@ -18,8 +18,9 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
     role_id: 1,
     title: 'UX Designer',
   };
+  const cookieExp = new Date(Date.now() + 8 * 3600000);
   const options = {
-    maxAge: 86400,
+    maxAge: cookieExp,
     path: '/',
     domain: 'femmecubator.com',
   };
