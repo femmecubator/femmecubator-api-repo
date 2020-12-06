@@ -35,7 +35,7 @@ describe('common-menu middleware', () => {
     const response = httpMocks.createResponse({
       locals: {
         user: {
-          userId: 'jane_d@gmail.com',
+          email: 'jane_d@gmail.com',
           userName: 'Jane D.',
           role_id: 1000,
         },
@@ -48,7 +48,7 @@ describe('common-menu middleware', () => {
     const response = httpMocks.createResponse({
       locals: {
         user: {
-          userId: 'jane_d@gmail.com',
+          email: 'jane_d@gmail.com',
           userName: 'Jane D.',
           role_id: 1001,
         },
@@ -62,7 +62,7 @@ describe('common-menu middleware', () => {
     const response = httpMocks.createResponse({
       locals: {
         user: {
-          userId: 'jane_d@gmail.com',
+          email: 'jane_d@gmail.com',
           userName: 'Jane D.',
           role_id: 1002,
         },
@@ -76,7 +76,7 @@ describe('common-menu middleware', () => {
     const response = httpMocks.createResponse({
       locals: {
         user: {
-          userId: 'jane_d@gmail.com',
+          email: 'jane_d@gmail.com',
           userName: 'Jane D.',
           role_id: 1003,
         },

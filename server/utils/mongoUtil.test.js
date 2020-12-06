@@ -25,7 +25,7 @@ describe('mongoUtil', () => {
     const response = httpMocks.createResponse({
       locals: {
         user: {
-          userId: 'jane_d@gmail.com',
+          email: 'jane_d@gmail.com',
           userName: 'Jane D.',
           role_id: 1000,
         },

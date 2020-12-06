@@ -3,6 +3,7 @@ const greetingRoutes = require('../routes/greetings');
 const commonMenuRoutes = require('../routes/common-menu');
 const encryptRoutes = require('../routes/encrypt');
 const loginRoutes = require('../routes/login');
+const registerRoutes = require('../routes/register');
 const cookieParser = require('cookie-parser');
 const { CORS_ORIGINS } = require('../utils/constants');
 
@@ -29,5 +30,6 @@ module.exports = () => {
   app.use('/api/commonMenu', commonMenuRoutes);
   app.use('/api/encrypt', encryptRoutes);
   app.use('/api/login', loginRoutes);
+  app.use('/api/register', registerRoutes);
   return app;
 };
