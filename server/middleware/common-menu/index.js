@@ -18,7 +18,9 @@ const commonMenuService = async (role_id, userName, title) => {
   let message;
   let collectionObj;
   try {
-    collectionObj = await mongoUtil.fetchCollection('common-menu');
+    collectionObj = await mongoUtil.fetchCollection(
+      process.env.COMMON_MENU_COLLECTION
+    );
 
     data = await collectionObj.findOne(
       { role_id },
