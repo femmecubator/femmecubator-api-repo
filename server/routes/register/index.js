@@ -23,11 +23,11 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   if (email.toLowerCase() === 'test1@femmecubator.com') {
     res
       .status(HttpStatusCodes.StatusCodes.UNAUTHORIZED)
-      .send({ err: 'Email already registered' });
+      .send({ err: { email: { message: 'Email already registered' } } });
   } else if (userName.toLowerCase() === 'john.doe') {
     res
       .status(HttpStatusCodes.StatusCodes.UNAUTHORIZED)
-      .send({ err: 'User name already taken' });
+      .send({ err: { userName: { message: 'User name already taken' } } });
   } else {
     const payload = { email, userName, role_id: 1, title };
     const cookieExp = new Date(Date.now() + 8 * 3600000);
