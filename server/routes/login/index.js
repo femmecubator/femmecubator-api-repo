@@ -24,12 +24,15 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
     domain: process.env.DOMAIN || 'femmecubator.com',
   };
   const token = JWT.sign(payload, process.env.SECRET_KEY);
-
+  /*
   res
     .status(HttpStatusCodes.StatusCodes.OK)
     .cookie('TOKEN', token, options)
     .cookie('SESSIONID', uuid(), options)
-    .end();
+    .end();*/
+  res.status(HttpStatusCodes.StatusCodes.UNAUTHORIZED).send({
+    err: 'Unauthorized message here',
+  });
 });
 
 module.exports = router;
