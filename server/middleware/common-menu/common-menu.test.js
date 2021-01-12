@@ -1,6 +1,7 @@
 const commonMenuMiddleware = require('./index');
 const httpMocks = require('node-mocks-http');
 const mockMongoUtil = require('../../utils/mongoUtil');
+const loggerMock = require('simple-node-logger').createSimpleLogger();
 
 jest.mock('../../utils/mongoUtil');
 
@@ -11,14 +12,6 @@ jest.mock('cryptr', () => {
     return { decrypt: () => mockPlainText };
   });
 });
-
-/*jest.mock('simple-node-logger'.createSimpleLogger, () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      info: jest.fn(() => {}),
-    };
-  });
-});*/
 
 jest.mock('simple-node-logger', () => ({
   createSimpleLogger: jest
@@ -31,7 +24,7 @@ jest.mock('mongodb');
 describe('common-menu middleware', () => {
   let request;
   beforeEach(() => {
-    mockMongoUtil.fetchCollection.mockImplementationOnce(jest.fn());
+    mockMongoUtil.fetchCollection.mockImplementation(jest.fn());
     request = httpMocks.createRequest({
       method: 'GET',
       url: 'api/common-menu',
@@ -47,7 +40,9 @@ describe('common-menu middleware', () => {
         },
       },
     });
+    const loggerSpy = jest.spyOn(loggerMock, 'info').mockImplementationOnce();
     await commonMenuMiddleware.getMenuItems(request, response);
+    expect(loggerSpy).toHaveBeenCalled();
     expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   }, 30000);
   it('should throw an exception', async () => {
@@ -60,7 +55,9 @@ describe('common-menu middleware', () => {
         },
       },
     });
+    const loggerSpy = jest.spyOn(loggerMock, 'info').mockImplementationOnce();
     await commonMenuMiddleware.getMenuItems(request, response);
+    expect(loggerSpy).toHaveBeenCalled();
     expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   });
 
@@ -74,7 +71,9 @@ describe('common-menu middleware', () => {
         },
       },
     });
+    const loggerSpy = jest.spyOn(loggerMock, 'info').mockImplementationOnce();
     await commonMenuMiddleware.getMenuItems(request, response);
+    expect(loggerSpy).toHaveBeenCalled();
     expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   });
 
@@ -88,7 +87,9 @@ describe('common-menu middleware', () => {
         },
       },
     });
+    const loggerSpy = jest.spyOn(loggerMock, 'info').mockImplementationOnce();
     await commonMenuMiddleware.getMenuItems(request, response);
+    expect(loggerSpy).toHaveBeenCalled();
     expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
   });
 });
