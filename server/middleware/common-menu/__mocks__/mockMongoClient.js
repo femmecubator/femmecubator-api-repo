@@ -1,22 +1,4 @@
 const { MongoClient } = require('mongodb');
- 
-// module.exports = {
-//   fetchCollection: async function (collectionName) {
-//     let db;
-  
-//     const client = await MongoClient.connect(process.env.MONGO_URL, {
-//         useNewUrlParser: true,
-//         useUnifiedTopology: true
-//     });
-    
-//     db = await connection.db();
-
-//     const db = client.db();
-//     const collectionObj = db.collection(collectionName);
-//     return collectionObj;
-//   }
-  
-// };
 
 class MockMongoClient {
   constructor() {
