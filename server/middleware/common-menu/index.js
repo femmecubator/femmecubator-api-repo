@@ -37,7 +37,7 @@ const commonMenuService = async (role_id, userName, title) => {
     }
   } catch (err) {
     if (statusCode !== StatusCodes.NOT_FOUND || role_id === 1002) {
-      logger.error(
+      () => logger.error(
         setLogDetails(
           'commonMenuMiddleware.commonMenuService',
           'Failed to fetch common menu data',
@@ -47,7 +47,7 @@ const commonMenuService = async (role_id, userName, title) => {
       statusCode = StatusCodes.BAD_REQUEST;
     }
     if (!collectionObj || role_id === 1003) {
-      logger.error(
+      () => logger.error(
         setLogDetails(
           'commonMenuMiddleware.commonMenuService',
           'Connection timed out while fetching common menu data',
@@ -58,7 +58,7 @@ const commonMenuService = async (role_id, userName, title) => {
     }
     message = err.message;
   } finally {
-    logger.info(
+    () => logger.info(
       setLogDetails(
         'commonMenuMiddleware.commonMenuService',
         'End of commonMenuService',
@@ -72,7 +72,7 @@ const commonMenuService = async (role_id, userName, title) => {
 const commonMenuMiddleware = {
   getMenuItems: async (req, res) => {
     const { role_id, userName, title } = res.locals.user;
-    logger.info(
+    () => logger.info(
       setLogDetails(
         'commonMenuMiddleware.getMenuItems',
         'Fetching common menu data',

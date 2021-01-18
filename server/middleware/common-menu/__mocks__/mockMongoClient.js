@@ -1,51 +1,51 @@
-const mockData = {
-  role_id: 1,
-  headers: [
-    {
-      id: 1,
-      label: 'Listings',
-      href: '/listings',
-    },
-    {
-      id: 2,
-      label: 'Mentors',
-      href: '/mentors',
-    },
-    {
-      id: 3,
-      label: 'My Account',
-      href: '/account',
-    },
-    {
-      id: 4,
-      label: 'Log Out',
-      href: '/logout',
-    },
-  ],
-};
+const { MongoClient } = require('mongodb');
+ 
+// module.exports = {
+//   fetchCollection: async function (collectionName) {
+//     let db;
+  
+//     const client = await MongoClient.connect(process.env.MONGO_URL, {
+//         useNewUrlParser: true,
+//         useUnifiedTopology: true
+//     });
+    
+//     db = await connection.db();
 
-const MockMongoClient = {
-  connect: async function (_uri, _options) {
-    const client = {
-      db: mockDb,
-      close: () => {},
-    };
-    return Promise.resolve(client);
-  },
-};
+//     const db = client.db();
+//     const collectionObj = db.collection(collectionName);
+//     return collectionObj;
+//   }
+  
+// };
 
-const mockDb = () => {
-  return {
-    collection() {
-      return mockCollection;
-    },
-  };
-};
+class MockMongoClient {
+  constructor() {
+    this.db = null;
+    this.connection = null;
+  }
 
-const mockCollection = {
-  findOne({ role_id }) {
-    return role_id === 1000 ? Promise.resolve(mockData) : Promise.resolve(null);
-  },
-};
+  async start() {
+    this.connection = await MongoClient.connect(process.env.MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    this.db = await this.connection.db();
+  }
 
-module.exports = { MockMongoClient };
+  async populateDB() {
+    const users = this.db.collection('users');
+    const mockUser = {_id: 'some-user-id', name: 'John'};
+    await users.insertOne(mockUser);
+  }
+
+  async startAndPopulateDB() {
+    await this.start();
+    await this.populateDB();
+  }
+
+  stop() {
+    this.connection.close();
+  }
+}
+
+module.exports = MockMongoClient;
