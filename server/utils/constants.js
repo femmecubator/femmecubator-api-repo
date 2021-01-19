@@ -14,5 +14,6 @@ module.exports = {
     'http://local.femmecubator.com:3000',
     'https://femmecubator.com',
     'https://www.femmecubator.com',
+    'https://femmecubator-ui-uat-tijbx.ondigitalocean.app',
   ],
 };
