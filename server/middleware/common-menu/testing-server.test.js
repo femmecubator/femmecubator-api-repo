@@ -43,12 +43,7 @@ describe('testing', () => {
       ],
       utilities: [
         { id: 1, label: 'Settings', color: 'inherit', href: '/settings' },
-        {
-          id: 2,
-          label: 'Log Out',
-          color: 'inherit',
-          href: '/login?logout=true'
-        }
+        { id: 2, label: 'Log Out', color: 'inherit', href: '/login?logout=true' },
       ],
       userName: 'Jane D.',
       title: 'Software Engineer'
