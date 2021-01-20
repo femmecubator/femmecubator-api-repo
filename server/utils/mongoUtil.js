@@ -1,6 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const Cryptr = require('cryptr');
-const { SECRET_KEY, MONGO_DB_URL, FEMMECUBATOR_DB, MONGO_URL } = process.env;
+const { SECRET_KEY, MONGO_DB_URL, FEMMECUBATOR_DB } = process.env;
 const cryptr = new Cryptr(SECRET_KEY);
 const url = cryptr.decrypt(MONGO_DB_URL);
 
