@@ -2,7 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 const Cryptr = require('cryptr');
 const { SECRET_KEY, MONGO_DB_URL, FEMMECUBATOR_DB, MONGO_URL } = process.env;
 const cryptr = new Cryptr(SECRET_KEY);
-const url = MONGO_URL || cryptr.decrypt(MONGO_DB_URL);
+const url = cryptr.decrypt(MONGO_DB_URL);
 
 module.exports = {
   fetchCollection: async function (collectionName) {
