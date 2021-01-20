@@ -128,3 +128,6 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# globalConfig.json for mock mongo server (randomly created during test)
+globalConfig.json
