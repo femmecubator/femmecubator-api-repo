@@ -3,6 +3,11 @@ const httpMocks = require('node-mocks-http');
 const mockMongoUtil = require('../../utils/mongoUtil');
 
 jest.mock('../../utils/mongoUtil');
+let collectionObj = mockMongoUtil.fetchCollection.mockImplementationOnce(jest.fn());
+collectionObj.insertOne = jest.fn();
+const errorMessage = {
+  data: 'There was a problem with your request. Please try again later.'
+}
 
 jest.mock('cryptr', () => {
   const mockPlainText =
@@ -12,19 +17,9 @@ jest.mock('cryptr', () => {
   });
 });
 
-jest.mock('simple-node-logger'.createSimpleLogger, () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      info: jest.fn(() => { }),
-    };
-  });
-});
-
-jest.mock('mongodb');
-
+let request, response;
 describe('Registration API', () => {
   beforeEach(() => {
-    mockMongoUtil.fetchCollection.mockImplementationOnce(jest.fn());
     request = httpMocks.createRequest({
       method: 'POST',
       url: 'api/register',
@@ -41,90 +36,29 @@ describe('Registration API', () => {
   });
 
   it('should add a new user document to collection ', async () => {
-    const response = httpMocks.createResponse({
-        data: {
-          CommandResult: {
-            result: { n: 1, ok: 1 },
-            insertedCount: 1,
-          },
-      },
-    });
-    await registrationService(request, response);
-    expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
-  }, 30000);
-
-  it('should throw an exception', async () => {
-    const response = httpMocks.createResponse({
-      locals: {
-
-
-      },
-    });
-    await registrationService(request, response);
-    expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
+    response = httpMocks.createResponse();
+    request.body.collectionObj = collectionObj;
+    await registrationService(request, response)
+    expect(collectionObj.insertOne).toHaveBeenCalled();
   });
 
-  // it('should return statusCode BAD_REQUEST', async () => {
-  //   const response = httpMocks.createResponse({
-  //     locals: {
-  //       user: {
-  //         email: 'jane_d@gmail.com',
-  //         userName: 'Jane D.',
-  //         role_id: 1002,
-  //       },
-  //     },
-  //   });
-  //   await commonMenuMiddleware.getMenuItems(request, response);
-  //   expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
-  // });
+  it('should return statusCode BAD_REQUEST whe user creation fails', async () => {
+    response = httpMocks.createResponse();
+    request.body.collectionObj = true;
+    await registrationService(request, response);
+    expect(response.statusCode).toBe(400)
+  });
 
-  // it('should return statusCode GATEWAY_TIMEOUT', async () => {
-  //   const response = httpMocks.createResponse({
-  //     locals: {
-  //       user: {
-  //         email: 'jane_d@gmail.com',
-  //         userName: 'Jane D.',
-  //         role_id: 1003,
-  //       },
-  //     },
-  //   });
-  //   await commonMenuMiddleware.getMenuItems(request, response);
-  //   expect(mockMongoUtil.fetchCollection).toHaveBeenCalled();
-  // });
-})
-// const registrationService = require("./index");
+  it('should return proper error message when user creation fails', async () => {
+    response = httpMocks.createResponse();
+    request.body.collectionObj = collectionObj;
+    await registrationService(request, response)
+    expect(response._getJSONData()).toStrictEqual(errorMessage);
+  });
 
-// const testUser = {
-//     firstName: 'Testing',
-//     lastName: 'User',
-//     prefLoc: 'NYC',
-//     title: 'Software Engineer',
-//     email: 'Testing@femmcubator.com',
-//     userName: 'devtest2021',
-//     password: "H@llo2021!",
-// }
-
-// );
-
-
-// describe("Add new document to user collection", () => {
-
-//     test("it can add a new user to the database", async () => {
-//         const actual = await registrationService(testUser)
-//         expect(actual.success).toBeTruthy()
-//         expect(actual.error).toBeUndefined()
-
-//         // we should be able to get the user
-//         const user = await registrationService(testUser.email)
-//         // for comparison, we delete the _id key returned from Mongo
-//         delete user._id
-//         expect(user).toEqual(testUser)
-//     })
-
-//     test("it returns an error when trying to register duplicate user", async () => {
-//         const expected = "A user with the given email already exists."
-//         const actual = await registrationService(testUser)
-//         expect(actual.error).toBe(expected)
-//         expect(actual.success).toBeFalsy()
-//     })
-// })
+  it('should return statusCode GATEWAY_TIMEOUT when db connection fails', async () => {
+    response = httpMocks.createResponse();
+    await registrationService(request, response);
+    expect(response.statusCode).toBe(504)
+  });
+});
