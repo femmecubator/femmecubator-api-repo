@@ -3,12 +3,12 @@ const commonMenuMiddleware = require('.');
 const httpMocks = require('node-mocks-http');
 
 jest.mock('cryptr', () => {
-  const mockPlainText = 'mongodb://fakeUser:fakePassword@mongodb.fakeDomain.com:27017/fakeDb';
+  const mockPlainText = process.env.MONGO_URL;
   return jest.fn().mockImplementation(() => {
     return { decrypt: () => mockPlainText };
   });
 });
- 
+
 describe('testing', () => {
   const mockMongoClient = new mongo;
 
