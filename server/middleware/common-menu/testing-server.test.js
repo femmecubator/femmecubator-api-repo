@@ -11,16 +11,26 @@ jest.mock('cryptr', () => {
 });
 
 describe('testing', () => {
+  const OLD_ENV = process.env;
 
   beforeAll(async () => {
-    process.env.COMMON_MENU_COLLECTION='common-menu';
     const client = await mongoUtil.connect();
     await mockMongoUtil.seed(client);
   });
-
-  afterAll(async () => await mongoUtil.close());
-
+  
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV };
+  });
+  
+  afterAll(async () => {
+    await mongoUtil.close();
+    process.env = OLD_ENV;
+  });
+  
   it('return common-menu API', async () => {
+    process.env.COMMON_MENU_COLLECTION='common-menu';
+
     const req = httpMocks.createRequest({
       method: 'GET',
       url: '/api/common-menu',
@@ -49,9 +59,9 @@ describe('testing', () => {
       ],
       userName: 'Jane D.',
       title: 'Software Engineer'
-    }
+    };
 
     await commonMenuMiddleware.getMenuItems(req, res);
     expect(res._getData().data).toEqual(expectedResp);
-  })
+  });
 });
