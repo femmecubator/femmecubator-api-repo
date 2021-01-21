@@ -1,4 +1,5 @@
-const mongo = require('../../utils/__mocks__/mockMongoClient');
+const mockMongoUtil = require('../../utils/__mocks__/mockMongoClient');
+const mongoUtil = require('../../utils/mongoUtil');
 const commonMenuMiddleware = require('.');
 const httpMocks = require('node-mocks-http');
 
@@ -10,15 +11,26 @@ jest.mock('cryptr', () => {
 });
 
 describe('testing', () => {
-  const mockMongoClient = new mongo;
+  const OLD_ENV = process.env;
 
   beforeAll(async () => {
-    process.env.COMMON_MENU_COLLECTION='common-menu'
-    await mockMongoClient.startAndPopulateDB();
+    const client = await mongoUtil.connect();
+    await mockMongoUtil.seed(client);
   });
-  afterAll(() => mockMongoClient.stop());
-
+  
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV };
+  });
+  
+  afterAll(async () => {
+    await mongoUtil.close();
+    process.env = OLD_ENV;
+  });
+  
   it('return common-menu API', async () => {
+    process.env.COMMON_MENU_COLLECTION='common-menu';
+
     const req = httpMocks.createRequest({
       method: 'GET',
       url: '/api/common-menu',
@@ -47,9 +59,9 @@ describe('testing', () => {
       ],
       userName: 'Jane D.',
       title: 'Software Engineer'
-    }
+    };
 
     await commonMenuMiddleware.getMenuItems(req, res);
     expect(res._getData().data).toEqual(expectedResp);
-  })
+  });
 });
