@@ -1,4 +1,5 @@
-const mongo = require('../../utils/__mocks__/mockMongoClient');
+const mockMongoUtil = require('../../utils/__mocks__/mockMongoClient');
+const mongoUtil = require('../../utils/mongoUtil');
 const commonMenuMiddleware = require('.');
 const httpMocks = require('node-mocks-http');
 
@@ -10,13 +11,14 @@ jest.mock('cryptr', () => {
 });
 
 describe('testing', () => {
-  const mockMongoClient = new mongo;
 
   beforeAll(async () => {
-    process.env.COMMON_MENU_COLLECTION='common-menu'
-    await mockMongoClient.startAndPopulateDB();
+    process.env.COMMON_MENU_COLLECTION='common-menu';
+    const client = await mongoUtil.connect();
+    await mockMongoUtil.seed(client);
   });
-  afterAll(() => mockMongoClient.stop());
+
+  afterAll(async () => await mongoUtil.close());
 
   it('return common-menu API', async () => {
     const req = httpMocks.createRequest({
