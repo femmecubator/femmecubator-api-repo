@@ -9,4 +9,4 @@ module.exports = {
     await usersCollection.insertMany(users);
     await commonMenuCollection.insertMany(commonMenu);
   }
-}
+};

@@ -12,27 +12,22 @@ const connect = async () => {
     useUnifiedTopology: true,
   });
   return client;
-}
+};
 
 const getClient = async () => {
   if (!client) await connect();
   return client;
-}
+};
 
 const fetchCollection = async (collectionName) => {
   if (!client) await connect();
   const db = client.db(FEMMECUBATOR_DB);
   const collectionObj = db.collection(collectionName);
   return collectionObj;
-}
+};
 
 const close = () => {
   client.close();
-}
-
-module.exports = {
-  client: getClient,
-  connect: connect,
-  close: close,
-  fetchCollection: fetchCollection,
 };
+
+module.exports = { client: getClient, connect, close, fetchCollection };
