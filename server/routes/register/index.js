@@ -34,7 +34,7 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
     const options = {
       expires: cookieExp,
       path: '/',
-      domain: 'femmecubator.com',
+      domain: process.env.DOMAIN || 'femmecubator.com',
     };
     const token = JWT.sign(payload, process.env.SECRET_KEY);
 
