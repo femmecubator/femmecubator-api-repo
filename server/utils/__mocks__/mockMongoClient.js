@@ -19,7 +19,7 @@ module.exports = {
   
       for(let i = 0; i < collections.length; i++) {
         await db.collection(collections[i]).drop();
-      };
+      }
     }
   },
   dropMentors: async function(client) {
