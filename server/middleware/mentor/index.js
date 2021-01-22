@@ -12,12 +12,23 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const queryMentors = async (role_id) => {
+const queryMentors = async ({ email, role_id }) => {
   let data;
   let statusCode;
   let message;
   let collectionObj;
+
+  logger.isInfo(
+    setLogDetails(
+      'mentorMiddleware.getMentors',
+      'Fetching metors data',
+      `User - ${email}`
+    )
+  );
+
   try {
+    if (role_id !== 1 && role_id !== 0) throw Error('Bad request');
+
     collectionObj = await mongoUtil.fetchCollection(
       process.env.USERS_COLLECTION
     );
@@ -37,7 +48,8 @@ const queryMentors = async (role_id) => {
         }
       )
       .toArray();
-    if (!data) {
+
+    if (!data.length) {
       statusCode = StatusCodes.NOT_FOUND;
       data = 'No Record Found';
       throw DataException('Data Unavailable');
@@ -46,22 +58,22 @@ const queryMentors = async (role_id) => {
       message = 'Success';
     }
   } catch (err) {
-    if (statusCode !== StatusCodes.NOT_FOUND || role_id === 1002) {
+    if (statusCode !== StatusCodes.NOT_FOUND) {
       logger.error(
         setLogDetails(
           'mentorMiddleware.getMentors',
           'Failed to fetch mentors data',
-          `Role ID - ${role_id}`
+          `User - ${email}`
         )
       );
       statusCode = StatusCodes.BAD_REQUEST;
     }
-    if (!collectionObj || role_id === 1003) {
+    if (statusCode !== StatusCodes.BAD_REQUEST && !collectionObj) {
       logger.error(
         setLogDetails(
           'mentorMiddleware.getMentors',
           'Connection timed out while fetching mentors data',
-          `Role ID - ${role_id}`
+          `User - ${email}`
         )
       );
       statusCode = StatusCodes.GATEWAY_TIMEOUT;
@@ -72,7 +84,7 @@ const queryMentors = async (role_id) => {
       setLogDetails(
         'mentorMiddleware.getMentors',
         'End of queryMentors',
-        `Role ID - ${role_id}`
+        `User - ${email}`
       )
     );
   }
@@ -81,15 +93,7 @@ const queryMentors = async (role_id) => {
 
 const mentorMiddleware = {
   getMentors: async (req, res) => {
-    const { role_id } = res.locals.user;
-    logger.isInfo(
-      setLogDetails(
-        'mentorMiddleware.getMentors',
-        'Fetching metors data',
-        `Role ID - ${role_id}`
-      )
-    );
-    const { statusCode, ...rest } = await queryMentors();
+    const { statusCode, ...rest } = await queryMentors(res.locals.user);
     res.status(statusCode).send(rest);
   },
 };

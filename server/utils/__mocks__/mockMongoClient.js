@@ -9,13 +9,18 @@ module.exports = {
     await usersCollection.insertMany(users);
     await commonMenuCollection.insertMany(commonMenu);
   },
-  drop: async function(client) {
+  drop: async function(client, collection) {
     const db = client.db();
-    const usersCollection = db.collection('users');
-    const commonMenuCollection = db.collection('common-menu');
+    if (collection) {
+      db.collection(collection).drop();
+    } else {
+      const collectionsObj = await db.listCollections().toArray();
+      const collections = collectionsObj.map(collection => collection.name);
   
-    await usersCollection.drop();
-    await commonMenuCollection.drop();
+      for(let i = 0; i < collections.length; i++) {
+        await db.collection(collections[i]).drop();
+      };
+    }
   },
   dropMentors: async function(client) {
     const db = client.db();
