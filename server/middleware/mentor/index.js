@@ -78,8 +78,7 @@ const queryMentors = async (role_id) => {
 
 const mentorMiddleware = {
   getMentors: async (req, res) => {
-    // const { role_id } = res.locals.user;
-    const role_id = 12;
+    const { role_id } = res.locals.user;
     logger.isInfo(
       setLogDetails(
         'mentorMiddleware.getMentors',
@@ -88,7 +87,6 @@ const mentorMiddleware = {
       )
     );
     const { statusCode, ...rest } = await queryMentors();
-    console.log({ statusCode, rest });
     res.status(statusCode).send(rest);
   },
 };

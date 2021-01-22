@@ -8,8 +8,8 @@ const authMiddleware = require('../../middleware/auth');
 router.get(
   '/',
   timeout(TIMEOUT, { respond: true }),
-  // authMiddleware.validateCookie,
-  // authMiddleware.errorHandler,
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
   mentorMiddleware.getMentors
 );
 
