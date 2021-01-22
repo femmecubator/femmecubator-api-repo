@@ -13,55 +13,54 @@ jest.mock('cryptr', () => {
 
 describe('mentor middleware', () => {
   const OLD_ENV = process.env;
-  let req;
+  let client;
+  let request;
 
   beforeAll(async () => {
-    const client = await mongoUtil.connect();
-    await mockMongoUtil.seed(client);
+    client = await mongoUtil.connect();
   });
-
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetModules();
     process.env = { ...OLD_ENV };
-    req = httpMocks.createRequest({
+
+    request = httpMocks.createRequest({
       method: 'GET',
       url: '/api/mentors',
     });
-  });
 
-  afterAll(async () => {
-    await mongoUtil.close();
+    await mockMongoUtil.seed(client);
+  });
+  afterEach(async () => await mockMongoUtil.drop(client));
+  afterAll(() => {
+    mongoUtil.close();
     process.env = OLD_ENV;
   });
 
-  describe('when user is logged in', () => {
+  it('should return all mentors if collection has mentors', async () => {
     process.env.USERS_COLLECTION = 'users';
-
-    const res = httpMocks.createResponse({
+    const response = httpMocks.createResponse({
       locals: {
         user: {
           email: 'jane_d@gmail.com',
-          userName: 'Jane D.',
+          firstName: 'Jane',
+          lastName: 'Doe',
           role_id: 1,
           title: 'Software Engineer'
         },
       },
     });
 
-    it('should return all mentors', async () => {
-      const mentors = users.filter(user => user.role_id === 0);
-      
-      const expectedResp = mentors.map(mentor => ({
-        firstName: mentor.firstName,
-        lastName: mentor.lastName,
-        title: mentor.title,
-        bio: mentor.bio,
-        skills: mentor.skills,
-      }))
-      
-      await mentorMiddleware.getMentors(req, res);
-      expect(res._getData().data).toEqual(expectedResp);
-    });
+    const mentors = users.filter(user => user.role_id === 0);
+    const expectedResponse = mentors.map(mentor => ({
+      firstName: mentor.firstName,
+      lastName: mentor.lastName,
+      title: mentor.title,
+      bio: mentor.bio,
+      skills: mentor.skills,
+    }));
+
+    await mentorMiddleware.getMentors(request, response);
+    expect(response._getData().data).toEqual(expectedResponse);
   });
 
 })
