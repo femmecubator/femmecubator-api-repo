@@ -49,7 +49,7 @@ describe('mentor middleware', () => {
     });
 
     it('should return all mentors', async () => {
-      const mentors = users.filter(user => user.role_id === 1);
+      const mentors = users.filter(user => user.role_id === 0);
       
       const expectedResp = mentors.map(mentor => ({
         firstName: mentor.firstName,
@@ -60,7 +60,7 @@ describe('mentor middleware', () => {
       }))
       
       await mentorMiddleware.getMentors(req, res);
-      expect(res._getData()).toEqual(expectedResp);
+      expect(res._getData().data).toEqual(expectedResp);
     });
   });
 

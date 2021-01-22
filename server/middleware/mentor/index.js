@@ -24,12 +24,15 @@ const queryMentors = async (role_id) => {
 
     data = await collectionObj
       .find(
-        {},
+        { role_id: 0 },
         {
           projection: {
             _id: 0,
-            userName: 1,
+            firstName: 1,
+            lastName: 1,
             title: 1,
+            skills: 1,
+            bio: 1,
           },
         }
       )
