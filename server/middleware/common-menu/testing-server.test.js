@@ -24,6 +24,7 @@ describe('testing', () => {
   });
   
   afterAll(async () => {
+    await mockMongoUtil.drop(client);
     await mongoUtil.close();
     process.env = OLD_ENV;
   });

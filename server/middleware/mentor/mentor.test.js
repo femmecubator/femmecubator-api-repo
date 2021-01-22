@@ -27,7 +27,8 @@ describe('mentor middleware', () => {
       method: 'GET',
       url: '/api/mentors',
     });
-
+    
+    await mockMongoUtil.drop(client);
     await mockMongoUtil.seed(client);
   });
   afterEach(async () => await mockMongoUtil.drop(client));
