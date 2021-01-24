@@ -24,11 +24,27 @@ const mockData = {
   ],
 };
 
+const CommandResultSuccess = {
+  result: { n: 1, ok: 1 },
+  ops: [{
+    firstName: 'Testing',
+    lastName: 'User',
+    prefLoc: 'NYC',
+    title: 'Software Engineer',
+    _id: 'test@dev.com',
+    userName: 'devtest2021',
+    password: "H@llo2021!",
+  }]
+}
+const CommandResultFail = {
+  result: { n: 0, ok: 0 },
+  ops: [{}]
+}
 const MockMongoClient = {
   connect: async function (_uri, _options) {
     const client = {
       db: mockDb,
-      close: () => {},
+      close: () => { },
     };
     return Promise.resolve(client);
   },
@@ -46,6 +62,13 @@ const mockCollection = {
   findOne({ role_id }) {
     return role_id === 1000 ? Promise.resolve(mockData) : Promise.resolve(null);
   },
+  insertOne({ email }) {
+    if (email.length > 0) {
+      return CommandResultSuccess
+    } else {
+      CommandResultFail;
+    }
+  }
 };
 
 module.exports = { MockMongoClient };

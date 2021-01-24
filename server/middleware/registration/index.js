@@ -30,9 +30,7 @@ const registrationService = async (req, res) => {
 
     try {
         collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
-        console.log(data, '#####');
         data = await collectionObj.insertOne({ ...userPayload });
-        console.log(data, '#####');
         if (!data) {
             statusCode = REQUEST_TIMEOUT;
             throw DataException(`Service Unavailable - There was a problem with your request. Please try again later`);
