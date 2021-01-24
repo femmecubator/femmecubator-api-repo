@@ -5,16 +5,17 @@ const {
     setLogDetails,
     DataException
 } = require('../../utils/constants');
+const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes
 const mongoUtil = require('../../utils/mongoUtil');
 const { HttpStatusCodes } = require('../../utils/constants');
 const JWT = require('jsonwebtoken');
 const { uuid } = require('uuidv4');
 
 const registrationService = async (req, res) => {
-    let saltRounds = 10;
-    let data, statusCode, collectionObj, userPayload, userId;
+    const saltRounds = 10;
+    let data, statusCode, userId, collectionObj;
 
-    let {
+    const {
         firstName,
         lastName,
         prefLoc,
@@ -25,34 +26,42 @@ const registrationService = async (req, res) => {
     } = req.body;
     userId = email;
 
-    password = bcrypt.hashSync(password, saltRounds);
-
-    userPayload = {
-        'email': email,
-        'userId': email,
-        'userName': userName,
-        'password': password,
-        'title': title,
-        'prefLoc': prefLoc,
-        'firstName': firstName,
-        'lastName': lastName,
-    }
+    const userPayload = { email, userId, userName, password: bcrypt.hashSync(password, saltRounds), title, prefLoc, firstName, lastName }
 
     try {
-        collectionObj = req.body.collectionObj ? req.body.collectionObj : await mongoUtil.fetchCollection
-            (process.env.USERS_COLLECTION);
+        collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
+        console.log(data, '#####');
         data = await collectionObj.insertOne({ ...userPayload });
+        console.log(data, '#####');
         if (!data) {
-            statusCode = StatusCodes.REQUEST_TIMEOUT;
-            data = 'There was a problem with your request. Please try again later.';
-            throw DataException('Service Unavailable');
+            statusCode = REQUEST_TIMEOUT;
+            throw DataException(`Service Unavailable - There was a problem with your request. Please try again later`);
         } else {
-            statusCode = StatusCodes.OK;
-            let { ops: [{ _id }] } = data;
-            userId = _id;
+            statusCode = OK;
+            const { ops: [{ _id: userId }] } = data
         }
+        const cookieExp = new Date(Date.now() + 8 * 3600000);
+        const options = {
+            expires: cookieExp,
+            path: '/',
+            domain: process.env.DOMAIN || 'femmecubator.com',
+        };
+        const token = JWT.sign(userPayload, process.env.SECRET_KEY);
+
+        res
+            .status(OK)
+            .cookie('TOKEN', token, options)
+            .cookie('SESSIONID', uuid(), options)
+            .end();
+        logger.info(
+            setLogDetails(
+                `registrationService`,
+                `registrationService was succesful`,
+                `userId - ${userId}`
+            )
+        )
     } catch (err) {
-        if (statusCode !== StatusCodes.REQUEST_TIMEOUT) {
+        if (statusCode !== REQUEST_TIMEOUT) {
             logger.error(
                 setLogDetails(
                     `registrationService`,
@@ -60,7 +69,7 @@ const registrationService = async (req, res) => {
                     `userId - ${userId}`
                 )
             )
-            statusCode = StatusCodes.BAD_REQUEST;
+            statusCode = BAD_REQUEST;
         }
         if (!collectionObj) {
             logger.error(
@@ -70,7 +79,7 @@ const registrationService = async (req, res) => {
                     `userId - ${userId}`
                 )
             )
-            statusCode = StatusCodes.GATEWAY_TIMEOUT;
+            statusCode = GATEWAY_TIMEOUT;
         } else {
             logger.error(
                 setLogDetails(
@@ -80,32 +89,15 @@ const registrationService = async (req, res) => {
                 )
             )
         }
-
         res
             .status(statusCode)
             .json({ data })
             .end();
-        return
     }
-
-    const cookieExp = new Date(Date.now() + 8 * 3600000);
-    const options = {
-        expires: cookieExp,
-        path: '/',
-        domain: process.env.DOMAIN || 'femmecubator.com',
-    };
-    const token = JWT.sign(userPayload, process.env.SECRET_KEY);
-
-    res
-        .status(HttpStatusCodes.StatusCodes.OK)
-        .cookie('TOKEN', token, options)
-        .cookie('SESSIONID', uuid(), options)
-        .end();
-
-    logger.error(
+    logger.info(
         setLogDetails(
             `registrationService`,
-            `End of registrationService`,
+            `end of registrationService`,
             `userId - ${userId}`
         )
     )
