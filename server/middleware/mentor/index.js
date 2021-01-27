@@ -5,6 +5,7 @@ const {
 } = require('../../utils/constants');
 const mongoUtil = require('../../utils/mongoUtil');
 
+const { OK, BAD_REQUEST, NOT_FOUND, GATEWAY_TIMEOUT } = StatusCodes;
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
   message,
@@ -49,10 +50,10 @@ const queryMentors = async ({ email, role_id }) => {
       .toArray();
 
     if (!data.length) {
-      statusCode = StatusCodes.NOT_FOUND;
+      statusCode = NOT_FOUND;
       message = 'No Record Found';
     } else {
-      statusCode = StatusCodes.OK;
+      statusCode = OK;
       message = 'Success';
     }
   } catch (error) {
@@ -64,7 +65,7 @@ const queryMentors = async ({ email, role_id }) => {
           `User - ${email}`
         )
       );
-      statusCode = StatusCodes.BAD_REQUEST;
+      statusCode = BAD_REQUEST;
       message = error.message;
     } else {
       logger.error(
@@ -74,8 +75,8 @@ const queryMentors = async ({ email, role_id }) => {
           `User - ${email}`
         )
       );
-      statusCode = StatusCodes.GATEWAY_TIMEOUT;
-      message = 'Gateway timeout'
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
     }
   } finally {
     logger.isInfo(
