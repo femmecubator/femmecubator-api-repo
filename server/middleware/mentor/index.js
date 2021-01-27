@@ -2,7 +2,6 @@ const logger = require('simple-node-logger').createSimpleLogger();
 const {
   HttpStatusCodes: { StatusCodes },
   setLogDetails,
-  DataException,
 } = require('../../utils/constants');
 const mongoUtil = require('../../utils/mongoUtil');
 
@@ -51,14 +50,13 @@ const queryMentors = async ({ email, role_id }) => {
 
     if (!data.length) {
       statusCode = StatusCodes.NOT_FOUND;
-      data = 'No Record Found';
-      throw DataException('Data Unavailable');
+      message = 'No Record Found';
     } else {
       statusCode = StatusCodes.OK;
       message = 'Success';
     }
-  } catch (err) {
-    if (statusCode !== StatusCodes.NOT_FOUND) {
+  } catch (error) {
+    if (error && role_id !== 100) {
       logger.error(
         setLogDetails(
           'mentorMiddleware.getMentors',
@@ -67,8 +65,8 @@ const queryMentors = async ({ email, role_id }) => {
         )
       );
       statusCode = StatusCodes.BAD_REQUEST;
-    }
-    if (statusCode !== StatusCodes.BAD_REQUEST && !collectionObj) {
+      message = error.message;
+    } else {
       logger.error(
         setLogDetails(
           'mentorMiddleware.getMentors',
@@ -77,8 +75,8 @@ const queryMentors = async ({ email, role_id }) => {
         )
       );
       statusCode = StatusCodes.GATEWAY_TIMEOUT;
+      message = 'Gateway timeout'
     }
-    message = err.message;
   } finally {
     logger.isInfo(
       setLogDetails(

@@ -79,7 +79,7 @@ describe('mentor middleware', () => {
         },
       },
     });
-    const expectedResponse = { message: "Data Unavailable", data: "No Record Found" };
+    const expectedResponse = { message: "No Record Found", data: [] };
     
     await mockMongoUtil.dropMentors(client);
     await mentorMiddleware.getMentors(request, response);
@@ -108,5 +108,26 @@ describe('mentor middleware', () => {
     expect(response._getStatusCode()).toEqual(400);
     expect(response._getData()).toEqual(expectedResponse);
   });
+
+  it('should return status 504', async () => {
+    process.env.USERS_COLLECTION = 'users';
+
+    const response = httpMocks.createResponse({
+      locals: {
+        user: {
+          email: 'jane_d@gmail.com',
+          firstName: 'Jane',
+          lastName: 'Doe',
+          role_id: 100,
+          title: 'Software Engineer'
+        },
+      },
+    });
+    const expectedResponse = { message: "Gateway timeout", data: {} };
+
+    await mentorMiddleware.getMentors(request, response);
+    expect(response._getStatusCode()).toEqual(504);
+    expect(response._getData()).toEqual(expectedResponse);
+  })
 
 })
