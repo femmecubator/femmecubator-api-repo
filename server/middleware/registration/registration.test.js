@@ -58,9 +58,10 @@ describe('registrationMiddleware', () => {
 
     expect(response._getStatusCode()).toEqual(200);
     expect(response._getData()).toEqual(expectedResp);
-    expect(response.cookie).toBeNull();
+    expect(response.cookie).not.toBeNull();
     expect(userCount).toEqual(1);
-  })
+  });
+
   // test('it should return status code REQUEST_TIMEOUT', async () => {
   //   request = httpMocks.createRequest({
   //     method: 'POST',
@@ -74,7 +75,7 @@ describe('registrationMiddleware', () => {
   //     }
   //   })
   //   response = httpMocks.createResponse();
-    // await register(request, response);
-    // expect(response._getStatusCode()).toBe(408);
+  //   await register(request, response);
+  //   expect(response._getStatusCode()).toBe(408);
   // })
 });
