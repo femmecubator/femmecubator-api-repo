@@ -20,7 +20,7 @@ describe('registrationMiddleware', () => {
   beforeEach(async () => {
     jest.resetModules();
     process.env = { ...OLD_ENV };
-    await mockMongoUtil.seed(client);
+    await mockMongoUtil.drop(client);
   });
   afterEach(async () => await mockMongoUtil.drop(client));
   afterAll(() => {
@@ -28,34 +28,38 @@ describe('registrationMiddleware', () => {
     process.env = OLD_ENV;
   });
 
-  test('it should add a new user document to collection', async () => {
+  test('should add new user, return cookie and status 200 ', async () => {
     process.env.USERS_COLLECTION = 'users';
     process.env.SECRET_KEY = 'ABC123';
 
+    const data = {
+      role_id: 0,
+      firstName: 'Testing',
+      lastName: 'User',
+      title: 'Software Engineer',
+      email: 'test@dev.com',
+    }
     const request = httpMocks.createRequest({
       method: 'POST',
       url: 'api/register',
       body: {
-        role_id: 0,
-        firstName: 'Testing',
-        lastName: 'User',
-        title: 'Software Engineer',
-        email: 'test@dev.com',
+        ...data,
         password: "H@llo2021!",
       }
     });
     const response = httpMocks.createResponse();
+    const expectedResp = {
+      data: { ...data },
+      message: 'Success',
+    }
     await register(request, response);
+    const collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
+    const userCount = await collectionObj.find({}).count();
 
     expect(response._getStatusCode()).toEqual(200);
-
-    // const result = JSON.parse(response._getData());
-    // console.log(result)
-    // const { data: { ops: [{ _id: userId }] } } = result;
-    // const { data: { result: { ok: confirmation } }
-    // } = result
-    // expect(confirmation).toBe(1);
-    // expect(userId).toBe('test@dev.com');
+    expect(response._getData()).toEqual(expectedResp);
+    expect(response.cookie).toBeNull();
+    expect(userCount).toEqual(1);
   })
   // test('it should return status code REQUEST_TIMEOUT', async () => {
   //   request = httpMocks.createRequest({

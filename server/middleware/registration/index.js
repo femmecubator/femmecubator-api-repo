@@ -18,9 +18,9 @@ const resObj = (statusCode, message, data = {}) => ({
 const isFormValid = ({ body }) => {
   const formFields = ['role_id', 'firstName', 'lastName', 'title', 'email', 'password'];
   
-  formFields.forEach(field => {
-    if (!Object.hasOwnProperty.call(body, field)) return false;
-  });
+  for (let i = 0; i < formFields.length; i++) {
+    if (!Object.hasOwnProperty.call(body, formFields[i])) return false;
+  }
   return true;
 };
 
@@ -57,7 +57,7 @@ const createNewUser = async (req, res) => {
     const userPayload = hashForm(req);
     const collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
     const insertion = await collectionObj.insertOne({ ...userPayload });
-    const { password, ...rest } = insertion.ops[0];
+    const { _id, password, ...rest } = insertion.ops[0];
     data = rest;
     
     if (!data) {
@@ -77,6 +77,7 @@ const createNewUser = async (req, res) => {
       registrationLogger.timeout(email);
       statusCode = GATEWAY_TIMEOUT;
     }
+    message = error.message;
   } finally {
     registrationLogger.end(email);
   }
