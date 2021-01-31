@@ -13,7 +13,6 @@ jest.mock('cryptr', () => {
 describe('registrationMiddleware', () => {
   const OLD_ENV = process.env;
   let client;
-  let request;
 
   beforeAll(async () => {
     client = await mongoUtil.connect();
@@ -32,20 +31,24 @@ describe('registrationMiddleware', () => {
   test('it should add a new user document to collection', async () => {
     process.env.USERS_COLLECTION = 'users';
     process.env.SECRET_KEY = 'ABC123';
-    request = httpMocks.createRequest({
+
+    const request = httpMocks.createRequest({
       method: 'POST',
       url: 'api/register',
       body: {
+        role_id: 0,
         firstName: 'Testing',
         lastName: 'User',
         title: 'Software Engineer',
         email: 'test@dev.com',
         password: "H@llo2021!",
       }
-    })
-    response = httpMocks.createResponse();
+    });
+    const response = httpMocks.createResponse();
     await register(request, response);
-    console.log(response._getData())
+
+    expect(response._getStatusCode()).toEqual(200);
+
     // const result = JSON.parse(response._getData());
     // console.log(result)
     // const { data: { ops: [{ _id: userId }] } } = result;

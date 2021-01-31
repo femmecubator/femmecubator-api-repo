@@ -47,6 +47,6 @@ const registrationLogger = {
       )
     );
   }
-}
+};
 
 module.exports = registrationLogger;

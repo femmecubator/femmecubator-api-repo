@@ -6,58 +6,69 @@ const {
 const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
 const JWT = require('jsonwebtoken');
-const { uuid } = require('uuidv4');
+const { v4 } = require('uuid');
 const registrationLogger = require('./registrationLogger');
 
-const validateFormFields = ({ body }) => {
-  const formFields = ['firstName', 'lastName', 'title', 'email', 'password'];
-  const saltRounds = 10;
+const resObj = (statusCode, message, data = {}) => ({
+  statusCode,
+  message,
+  data,
+});
 
+const isFormValid = ({ body }) => {
+  const formFields = ['role_id', 'firstName', 'lastName', 'title', 'email', 'password'];
+  
   formFields.forEach(field => {
-    if (!Object.hasOwnProperty.call(body, field)) {
-      throw Error('Bad request');
-    }
+    if (!Object.hasOwnProperty.call(body, field)) return false;
   });
+  return true;
+};
+
+const hashForm = ({ body }) => {
+  const saltRounds = 10;
   const { password, ...rest } = body;
   const userPayload = { password: bcrypt.hashSync(password, saltRounds), ...rest };
   return userPayload;
 };
 
-const register = async (req, res) => {
+const generateCookie = (res, userPayload) => {
+  const { password, ...rest } = userPayload;
+  const cookieExp = new Date(Date.now() + 8 * 3600000);
+  const options = {
+    expires: cookieExp,
+    path: '/',
+    domain: process.env.DOMAIN || 'femmecubator.com',
+  };
+  const token = JWT.sign(rest, process.env.SECRET_KEY);
+  res.cookie('TOKEN', token, options).cookie('SESSIONID', v4(), options);
+};
+
+const createNewUser = async (req, res) => {
   let data;
   let statusCode;
   let message;
-  let collectionObj;
 
   const { email } = req.body;
   registrationLogger.start(email);
 
   try {
-    const userPayload = validateFormFields(req);
-    collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
-    let insertion = await collectionObj.insertOne({ ...userPayload });
-    data = insertion.ops[0];
+    if (!isFormValid(req)) throw Error('Bad request');
+    
+    const userPayload = hashForm(req);
+    const collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
+    const insertion = await collectionObj.insertOne({ ...userPayload });
+    const { password, ...rest } = insertion.ops[0];
+    data = rest;
+    
     if (!data) {
       statusCode = REQUEST_TIMEOUT;
       throw DataException(`Service Unavailable - There was a problem with your request. Please try again later`);
     } else {
+      generateCookie(res, userPayload);
       statusCode = OK;
-      message = 'Success'
+      message = 'Success';
+      registrationLogger.success(email);
     }
-    const cookieExp = new Date(Date.now() + 8 * 3600000);
-    const options = {
-      expires: cookieExp,
-      path: '/',
-      domain: process.env.DOMAIN || 'femmecubator.com',
-    };
-    const token = JWT.sign(userPayload, process.env.SECRET_KEY);
-
-    res
-      .status(OK)
-      .cookie('TOKEN', token, options)
-      .cookie('SESSIONID', uuid(), options)
-      .end();
-    registrationLogger.success(email);
   } catch (error) {
     if (error) {
       registrationLogger.error(error, email);
@@ -66,16 +77,18 @@ const register = async (req, res) => {
       registrationLogger.timeout(email);
       statusCode = GATEWAY_TIMEOUT;
     }
-    res
-      .status(statusCode)
-      .json({ data })
-      .end();
   } finally {
     registrationLogger.end(email);
   }
+  return resObj(statusCode, message, data);
 };
 
-const registrationMiddleware = { register };
+const registrationMiddleware = {
+  register: async (req, res) => {
+    const { statusCode, ...rest } = await createNewUser(req, res);
+    res.status(statusCode).send(rest);
+  }
+};
 
 module.exports = registrationMiddleware;
 
