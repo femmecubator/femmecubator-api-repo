@@ -5,28 +5,24 @@ const {
     setLogDetails,
     DataException
 } = require('../../utils/constants');
-const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes
+const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
-const { HttpStatusCodes } = require('../../utils/constants');
 const JWT = require('jsonwebtoken');
 const { uuid } = require('uuidv4');
 
-const registrationService = async (req, res) => {
+const register = async (req, res) => {
     const saltRounds = 10;
-    let data, statusCode, userId, collectionObj;
+    let data, statusCode, collectionObj;
 
     const {
         firstName,
         lastName,
-        prefLoc,
         title,
         email,
-        userName,
         password,
     } = req.body;
-    userId = email;
 
-    const userPayload = { email, userId, userName, password: bcrypt.hashSync(password, saltRounds), title, prefLoc, firstName, lastName }
+    const userPayload = { email, password: bcrypt.hashSync(password, saltRounds), title, firstName, lastName };
 
     try {
         collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
@@ -36,7 +32,7 @@ const registrationService = async (req, res) => {
             throw DataException(`Service Unavailable - There was a problem with your request. Please try again later`);
         } else {
             statusCode = OK;
-            const { ops: [{ _id: userId }] } = data
+            // const { ops: [{ _id: userId }] } = data;
         }
         const cookieExp = new Date(Date.now() + 8 * 3600000);
         const options = {
@@ -55,18 +51,18 @@ const registrationService = async (req, res) => {
             setLogDetails(
                 `registrationService`,
                 `registrationService was succesful`,
-                `userId - ${userId}`
+                `email - ${email}`
             )
-        )
+        );
     } catch (err) {
         if (statusCode !== REQUEST_TIMEOUT) {
             logger.error(
                 setLogDetails(
                     `registrationService`,
                     `Failed to create new user`,
-                    `userId - ${userId}`
+                    `email - ${email}`
                 )
-            )
+            );
             statusCode = BAD_REQUEST;
         }
         if (!collectionObj) {
@@ -74,18 +70,18 @@ const registrationService = async (req, res) => {
                 setLogDetails(
                     `registrationService`,
                     `Connection time out while registering new user`,
-                    `userId - ${userId}`
+                    `email - ${email}`
                 )
-            )
+            );
             statusCode = GATEWAY_TIMEOUT;
         } else {
             logger.error(
                 setLogDetails(
                     `registrationService`,
                     `${err.message}`,
-                    `userId - ${userId}`
+                    `email - ${email}`
                 )
-            )
+            );
         }
         res
             .status(statusCode)
@@ -96,9 +92,12 @@ const registrationService = async (req, res) => {
         setLogDetails(
             `registrationService`,
             `end of registrationService`,
-            `userId - ${userId}`
+            `email - ${email}`
         )
-    )
-}
-module.exports = registrationService;
+    );
+};
+
+const registrationMiddleware = { register };
+
+module.exports = registrationMiddleware;
 

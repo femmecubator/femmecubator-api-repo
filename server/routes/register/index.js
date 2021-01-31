@@ -4,12 +4,12 @@ const router = express.Router();
 const { TIMEOUT, HttpStatusCodes } = require('../../utils/constants');
 const JWT = require('jsonwebtoken');
 const { uuid } = require('uuidv4');
-const registrationService = require('../../middleware/registration')
+const registrationMiddleware = require('../../middleware/registration');
 router.use(express.json());
 
 router.post(
   '/',
   timeout(TIMEOUT, { respond: true }),
-  registrationService
+  registrationMiddleware.register
 );
 module.exports = router;
