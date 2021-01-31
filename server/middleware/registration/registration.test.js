@@ -31,6 +31,7 @@ describe('registrationMiddleware', () => {
 
   test('it should add a new user document to collection', async () => {
     process.env.USERS_COLLECTION = 'users';
+    process.env.SECRET_KEY = 'ABC123';
     request = httpMocks.createRequest({
       method: 'POST',
       url: 'api/register',
@@ -43,7 +44,8 @@ describe('registrationMiddleware', () => {
       }
     })
     response = httpMocks.createResponse();
-    // await register(request, response);
+    await register(request, response);
+    console.log(response._getData())
     // const result = JSON.parse(response._getData());
     // console.log(result)
     // const { data: { ops: [{ _id: userId }] } } = result;
@@ -52,20 +54,20 @@ describe('registrationMiddleware', () => {
     // expect(confirmation).toBe(1);
     // expect(userId).toBe('test@dev.com');
   })
-  test('it should return status code REQUEST_TIMEOUT', async () => {
-    request = httpMocks.createRequest({
-      method: 'POST',
-      url: 'api/register',
-      body: {
-        firstName: '',
-        lastName: '',
-        title: '',
-        email: '',
-        password: '',
-      }
-    })
-    response = httpMocks.createResponse();
+  // test('it should return status code REQUEST_TIMEOUT', async () => {
+  //   request = httpMocks.createRequest({
+  //     method: 'POST',
+  //     url: 'api/register',
+  //     body: {
+  //       firstName: '',
+  //       lastName: '',
+  //       title: '',
+  //       email: '',
+  //       password: '',
+  //     }
+  //   })
+  //   response = httpMocks.createResponse();
     // await register(request, response);
     // expect(response._getStatusCode()).toBe(408);
-  })
+  // })
 });

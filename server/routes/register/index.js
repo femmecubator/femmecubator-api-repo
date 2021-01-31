@@ -10,7 +10,6 @@ router.use(express.json());
 router.post(
   '/',
   timeout(TIMEOUT, { respond: true }),
-  registrationMiddleware.validateFormFields,
-  registrationMiddleware.register
+  registrationMiddleware.register,
 );
 module.exports = router;

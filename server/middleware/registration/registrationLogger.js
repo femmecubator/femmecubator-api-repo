@@ -1,34 +1,52 @@
 const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails } = require('../../utils/constants');
 
-const logValidateFormFields = {
-  start: ({ firstName, lastName, title, email }) => {
+const registrationLogger = {
+  start: (email) => {
     logger.info(
       setLogDetails(
-        'registrationMiddleware.validateFormFields',
-        'Validating registration form fields',
-        `firstName - ${firstName}, lastName - ${lastName}, title - ${title}, email - ${email}`
+        `registrationMiddleware.register`,
+        `Start user register`,
+        `email - ${email}`
       )
     );
   },
-  end: ({ firstName, lastName, title, email }) => {
+  success: (email) => {
     logger.info(
       setLogDetails(
-        'registrationMiddleware.validateFormFields',
-        'End of validateFormFields',
-        `firstName - ${firstName}, lastName - ${lastName}, title - ${title}, email - ${email}`
+        `registrationMiddleware.register`,
+        `User registration was successful`,
+        `email - ${email}`
       )
     );
   },
-  error: ({ firstName, lastName, title, email }) => {
+  end: (email) => {
+    logger.info(
+      setLogDetails(
+        `registrationMiddleware.register`,
+        `End of register`,
+        `email - ${email}`
+      )
+    );
+  },
+  error: (error, email) => {
     logger.error(
       setLogDetails(
-        'registrationMiddleware.validateFormFields',
-        'Failed to validate registration form fields',
-        `firstName - ${firstName}, lastName - ${lastName}, title - ${title}, email - ${email}`
+        `registrationMiddleware.register`,
+        `${error.message}`,
+        `email - ${email}`
+      )
+    );
+  },
+  timeout: (email) => {
+    logger.error(
+      setLogDetails(
+        `registrationMiddleware.register`,
+        `Connection time out while registering new user`,
+        `email - ${email}`
       )
     );
   }
-};
+}
 
-module.exports = { logValidateFormFields };
+module.exports = registrationLogger;
