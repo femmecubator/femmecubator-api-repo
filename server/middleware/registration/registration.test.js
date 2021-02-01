@@ -51,7 +51,7 @@ describe('registrationMiddleware', () => {
     const expectedResp = {
       data: { ...data },
       message: 'Success',
-    }
+    };
     await register(request, response);
     const collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
     const userCount = await collectionObj.find({}).count();
@@ -62,20 +62,89 @@ describe('registrationMiddleware', () => {
     expect(userCount).toEqual(1);
   });
 
-  // test('it should return status code REQUEST_TIMEOUT', async () => {
-  //   request = httpMocks.createRequest({
-  //     method: 'POST',
-  //     url: 'api/register',
-  //     body: {
-  //       firstName: '',
-  //       lastName: '',
-  //       title: '',
-  //       email: '',
-  //       password: '',
-  //     }
-  //   })
-  //   response = httpMocks.createResponse();
-  //   await register(request, response);
-  //   expect(response._getStatusCode()).toBe(408);
-  // })
+  test('should return status 400 with empty form fields', async () => {
+    process.env.USERS_COLLECTION = 'users';
+    process.env.SECRET_KEY = 'ABC123';
+
+    const request = httpMocks.createRequest({
+      method: 'POST',
+      url: 'api/register',
+      body: {
+        role_id: '',
+        firstName: '',
+        lastName: '',
+        title: '',
+        email: '',
+        password: '',
+      }
+    });
+    const response = httpMocks.createResponse();
+    const expectedResp = {
+      data: {},
+      message: 'Bad request'
+    };
+    await register(request, response);
+    const collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
+    const userCount = await collectionObj.find({}).count();
+
+    expect(response._getStatusCode()).toBe(400);
+    expect(response._getData()).toEqual(expectedResp);
+    expect(response.cookies).toStrictEqual({});
+    expect(userCount).toEqual(0);
+  });
+
+  test('should return status 400 with invalid form fields', async () => {
+    process.env.USERS_COLLECTION = 'users';
+    process.env.SECRET_KEY = 'ABC123';
+
+    const request = httpMocks.createRequest({
+      method: 'POST',
+      url: 'api/register',
+      body: {
+        email: '',
+        password: '',
+      }
+    });
+    const response = httpMocks.createResponse();
+    const expectedResp = {
+      data: {},
+      message: 'Bad request'
+    };
+    await register(request, response);
+    const collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
+    const userCount = await collectionObj.find({}).count();
+
+    expect(response._getStatusCode()).toBe(400);
+    expect(response._getData()).toEqual(expectedResp);
+    expect(response.cookies).toStrictEqual({});
+    expect(userCount).toEqual(0);
+  });
+
+  test('should return status 504', async () => {
+    process.env.USERS_COLLECTION = 'users';
+    process.env.SECRET_KEY = 'ABC123';
+    process.env.TIMEOUT = true;
+
+    const request = httpMocks.createRequest({
+      method: 'POST',
+      url: 'api/register',
+      body: {
+        role_id: '',
+        firstName: '',
+        lastName: '',
+        title: '',
+        email: '',
+        password: '',
+      }
+    });
+    const response = httpMocks.createResponse();
+    const expectedResp = {
+      data: {},
+      message: 'Gateway timeout',
+    };
+    await register(request, response);
+
+    expect(response._getStatusCode()).toBe(504);
+    expect(response._getData()).toEqual(expectedResp);
+  });
 });

@@ -19,8 +19,11 @@ const isFormValid = ({ body }) => {
   const formFields = ['role_id', 'firstName', 'lastName', 'title', 'email', 'password'];
   
   for (let i = 0; i < formFields.length; i++) {
-    if (!Object.hasOwnProperty.call(body, formFields[i])) return false;
-  }
+    const field = formFields[i];
+    if (!Object.hasOwnProperty.call(body, formFields[i]) || body[field].length == 0) {
+      return false;
+    }
+  };
   return true;
 };
 
@@ -32,18 +35,20 @@ const hashForm = ({ body }) => {
 };
 
 const generateCookie = (res, userPayload) => {
+  const { DOMAIN, SECRET_KEY } = process.env;
   const { password, ...rest } = userPayload;
   const cookieExp = new Date(Date.now() + 8 * 3600000);
   const options = {
     expires: cookieExp,
     path: '/',
-    domain: process.env.DOMAIN || 'femmecubator.com',
+    domain: DOMAIN || 'femmecubator.com',
   };
-  const token = JWT.sign(rest, process.env.SECRET_KEY);
+  const token = JWT.sign(rest, SECRET_KEY);
   res.cookie('TOKEN', token, options).cookie('SESSIONID', v4(), options);
 };
 
 const createNewUser = async (req, res) => {
+  const { USERS_COLLECTION, TIMEOUT } = process.env;
   let data;
   let statusCode;
   let message;
@@ -55,8 +60,8 @@ const createNewUser = async (req, res) => {
     if (!isFormValid(req)) throw Error('Bad request');
     
     const userPayload = hashForm(req);
-    const collectionObj = await mongoUtil.fetchCollection(process.env.USERS_COLLECTION);
-    const insertion = await collectionObj.insertOne({ ...userPayload });
+    const collectionObj = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const insertion = await collectionObj.insertOne(userPayload);
     const { _id, password, ...rest } = insertion.ops[0];
     data = rest;
     
@@ -70,14 +75,15 @@ const createNewUser = async (req, res) => {
       registrationLogger.success(email);
     }
   } catch (error) {
-    if (error) {
+    if (error && !TIMEOUT) {
       registrationLogger.error(error, email);
       statusCode = BAD_REQUEST;
+      message = error.message;
     } else {
       registrationLogger.timeout(email);
       statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
     }
-    message = error.message;
   } finally {
     registrationLogger.end(email);
   }
