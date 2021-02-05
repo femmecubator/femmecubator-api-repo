@@ -74,7 +74,10 @@ const createNewUser = async (req, res) => {
       { email: email },
       { projection: {email: 1} },
     );
-    if (userFound) throw Error('Email already in use');
+    if (userFound) {
+      statusCode = 409;
+      throw Error('Email already in use');
+    }
 
     const insertion = await userCollection.insertOne(userPayload);
     const { _id, password, ...rest } = insertion.ops[0];
@@ -92,7 +95,7 @@ const createNewUser = async (req, res) => {
   } catch (error) {
     if (error && !TEST_TIMEOUT) {
       registrationLogger.error(error, email);
-      statusCode = BAD_REQUEST;
+      statusCode = statusCode || BAD_REQUEST;
       message = error.message;
     } else {
       registrationLogger.timeout(email);

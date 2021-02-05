@@ -58,8 +58,40 @@ describe('registrationMiddleware', () => {
 
     expect(response._getStatusCode()).toEqual(200);
     expect(response._getData()).toEqual(expectedResp);
-    expect(response.cookie).not.toBeNull();
+    expect(response.cookies.TOKEN).not.toBeUndefined();
     expect(userCount).toEqual(1);
+  });
+
+  test('should not add new user and return status 409 if email in use ', async () => {
+    process.env.USERS_COLLECTION = 'users';
+    process.env.SECRET_KEY = 'ABC123';
+    await mockMongoUtil.seed(client);
+
+    const data = {
+      role_id: 0,
+      firstName: "Jane",
+      lastName: "Doe",
+      email: "JANe_d@gmail.com",
+      title: "UX Designer",
+    }
+    const request = httpMocks.createRequest({
+      method: 'POST',
+      url: 'api/register',
+      body: {
+        ...data,
+        password: "H@llo2021!",
+      }
+    });
+    const response = httpMocks.createResponse();
+    const expectedResp = {
+      data: {},
+      message: 'Email already in use',
+    };
+    await register(request, response);
+
+    expect(response._getStatusCode()).toEqual(409);
+    expect(response._getData()).toEqual(expectedResp);
+    expect(response.cookies.TOKEN).toBeUndefined();
   });
 
   test('should return status 400 with empty form fields', async () => {
