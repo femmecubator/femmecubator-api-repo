@@ -27,14 +27,6 @@ const isFormValid = ({ body }) => {
   return true;
 };
 
-const isEmailInUse = async (userCollection, email) => {
-  const foundUser = await userCollection.findOne(
-    { email: email },
-    { projection: {email: 1} },
-  );
-  return foundUser ? true : false;
-};
-
 const hashForm = ({ body }) => {
   const saltRounds = 10;
   body.email = body.email.toLowerCase();
