@@ -34,10 +34,10 @@ describe('registrationMiddleware', () => {
 
     const data = {
       role_id: 0,
-      firstName: 'Testing',
-      lastName: 'User',
-      title: 'Software Engineer',
-      email: 'test@dev.com',
+      firstName: "Jane",
+      lastName: "Doe",
+      email: "JANe_d@gmail.com",
+      title: "UX Designer",
     }
     const request = httpMocks.createRequest({
       method: 'POST',
@@ -49,7 +49,7 @@ describe('registrationMiddleware', () => {
     });
     const response = httpMocks.createResponse();
     const expectedResp = {
-      data: { ...data },
+      data: { ...data, email: data.email.toLowerCase() },
       message: 'Success',
     };
     await register(request, response);
@@ -123,19 +123,12 @@ describe('registrationMiddleware', () => {
   test('should return status 504', async () => {
     process.env.USERS_COLLECTION = 'users';
     process.env.SECRET_KEY = 'ABC123';
-    process.env.TIMEOUT = true;
+    process.env.TEST_TIMEOUT = true;
 
     const request = httpMocks.createRequest({
       method: 'POST',
       url: 'api/register',
-      body: {
-        role_id: '',
-        firstName: '',
-        lastName: '',
-        title: '',
-        email: '',
-        password: '',
-      }
+      body: {},
     });
     const response = httpMocks.createResponse();
     const expectedResp = {

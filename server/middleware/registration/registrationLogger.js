@@ -2,15 +2,6 @@ const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails } = require('../../utils/constants');
 
 const registrationLogger = {
-  start: (email) => {
-    logger.info(
-      setLogDetails(
-        `registrationMiddleware.register`,
-        `Start user register`,
-        `email - ${email}`
-      )
-    );
-  },
   success: (email) => {
     logger.info(
       setLogDetails(

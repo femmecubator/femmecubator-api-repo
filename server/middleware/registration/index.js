@@ -23,12 +23,21 @@ const isFormValid = ({ body }) => {
     if (!Object.hasOwnProperty.call(body, formFields[i]) || body[field].length == 0) {
       return false;
     }
-  };
+  }
   return true;
+};
+
+const isEmailInUse = async (userCollection, email) => {
+  const foundUser = await userCollection.findOne(
+    { email: email },
+    { projection: {email: 1} },
+  );
+  return foundUser ? true : false;
 };
 
 const hashForm = ({ body }) => {
   const saltRounds = 10;
+  body.email = body.email.toLowerCase();
   const { password, ...rest } = body;
   const userPayload = { password: bcrypt.hashSync(password, saltRounds), ...rest };
   return userPayload;
@@ -48,20 +57,26 @@ const generateCookie = (res, userPayload) => {
 };
 
 const createNewUser = async (req, res) => {
-  const { USERS_COLLECTION, TIMEOUT } = process.env;
+  const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
   let data;
   let statusCode;
   let message;
-
-  const { email } = req.body;
-  registrationLogger.start(email);
+  let email;
 
   try {
     if (!isFormValid(req)) throw Error('Bad request');
     
     const userPayload = hashForm(req);
-    const collectionObj = await mongoUtil.fetchCollection(USERS_COLLECTION);
-    const insertion = await collectionObj.insertOne(userPayload);
+    email = req.body.email;
+
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const userFound = await userCollection.findOne(
+      { email: email },
+      { projection: {email: 1} },
+    );
+    if (userFound) throw Error('Email already in use');
+
+    const insertion = await userCollection.insertOne(userPayload);
     const { _id, password, ...rest } = insertion.ops[0];
     data = rest;
     
@@ -75,7 +90,7 @@ const createNewUser = async (req, res) => {
       registrationLogger.success(email);
     }
   } catch (error) {
-    if (error && !TIMEOUT) {
+    if (error && !TEST_TIMEOUT) {
       registrationLogger.error(error, email);
       statusCode = BAD_REQUEST;
       message = error.message;
@@ -84,8 +99,6 @@ const createNewUser = async (req, res) => {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
     }
-  } finally {
-    registrationLogger.end(email);
   }
   return resObj(statusCode, message, data);
 };
