@@ -24,7 +24,14 @@ const isFormValid = ({ body }) => {
       return false;
     }
   }
-  return true;
+
+  const emailPattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (!emailPattern.test(body.email)) {
+    return false;
+  } else {
+    return true;
+  }
+
 };
 
 const hashForm = ({ body }) => {
