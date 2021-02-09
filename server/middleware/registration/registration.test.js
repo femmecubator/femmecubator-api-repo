@@ -133,8 +133,12 @@ describe('registrationMiddleware', () => {
       method: 'POST',
       url: 'api/register',
       body: {
-        email: '',
-        password: '',
+        role_id: 0,
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "JANe_dgmail.com",
+        title: "UX Designer",
+        password: "H@llo2021!",
       }
     });
     const response = httpMocks.createResponse();
