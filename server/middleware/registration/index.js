@@ -101,6 +101,8 @@ const createNewUser = async (req, res) => {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
     }
+  } finally {
+    registrationLogger.end(email);
   }
   return resObj(statusCode, message, data);
 };

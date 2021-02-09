@@ -15,7 +15,7 @@ const registrationLogger = {
     logger.info(
       setLogDetails(
         `registrationMiddleware.register`,
-        `End of register`,
+        `End of registration`,
         `email - ${email}`
       )
     );
