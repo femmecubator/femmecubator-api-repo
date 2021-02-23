@@ -16,11 +16,18 @@ const resObj = (statusCode, message, data = {}) => ({
 });
 
 const isFormValid = ({ body }) => {
-  const formFields = ['role_id', 'firstName', 'lastName', 'title', 'email', 'password'];
+  const formFields = [
+    'role_id',
+    'firstName',
+    'lastName',
+    'title',
+    'email',
+    'password'
+  ];
   
   for (let i = 0; i < formFields.length; i++) {
     const field = formFields[i];
-    if (!Object.hasOwnProperty.call(body, formFields[i]) || body[field].length == 0) {
+    if (!Object.hasOwnProperty.call(body, formFields[i]) || body[field].length === 0) {
       return false;
     }
   }
@@ -60,13 +67,12 @@ const createNewUser = async (req, res) => {
   let data;
   let statusCode;
   let message;
-  let email;
+  let email = req.body.email;
 
   try {
     if (!isFormValid(req)) throw Error('Bad request');
     
     const userPayload = hashForm(req);
-    email = req.body.email;
 
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne(
