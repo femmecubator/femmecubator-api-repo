@@ -33,7 +33,7 @@ describe('registrationMiddleware', () => {
     process.env.SECRET_KEY = 'ABC123';
 
     const data = {
-      role_id: 0,
+      role_id: 1,
       firstName: "Jane",
       lastName: "Doe",
       email: "JANe_d@gmail.com",
@@ -68,7 +68,7 @@ describe('registrationMiddleware', () => {
     await mockMongoUtil.seed(client);
 
     const data = {
-      role_id: 0,
+      role_id: 1,
       firstName: "Jane",
       lastName: "Doe",
       email: "JANe_d@gmail.com",
@@ -133,7 +133,7 @@ describe('registrationMiddleware', () => {
       method: 'POST',
       url: 'api/register',
       body: {
-        role_id: 0,
+        role_id: 1,
         firstName: "Jane",
         lastName: "Doe",
         email: "JANe_dgmail.com",
