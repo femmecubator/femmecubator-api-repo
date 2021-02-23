@@ -17,7 +17,7 @@ const resObj = (statusCode, message, data = {}) => ({
 
 const isFormValid = ({ body }) => {
   const formFields = [
-    'role_id',
+    // 'role_id',
     'firstName',
     'lastName',
     'title',
@@ -45,7 +45,7 @@ const hashForm = ({ body }) => {
   const saltRounds = 10;
   body.email = body.email.toLowerCase();
   const { password, ...rest } = body;
-  const userPayload = { password: bcrypt.hashSync(password, saltRounds), ...rest };
+  const userPayload = { password: bcrypt.hashSync(password, saltRounds), ...rest, role_id: 1 };
   return userPayload;
 };
 
@@ -67,7 +67,7 @@ const createNewUser = async (req, res) => {
   let data;
   let statusCode;
   let message;
-  let email = req.body.email;
+  const email = req.body.email;
 
   try {
     if (!isFormValid(req)) throw Error('Bad request');
