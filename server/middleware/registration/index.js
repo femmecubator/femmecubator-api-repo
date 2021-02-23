@@ -45,7 +45,7 @@ const hashForm = ({ body }) => {
   const saltRounds = 10;
   body.email = body.email.toLowerCase();
   const { password, ...rest } = body;
-  const userPayload = { password: bcrypt.hashSync(password, saltRounds), ...rest, role_id: 1 };
+  const userPayload = { password: bcrypt.hashSync(password, saltRounds), ...rest };
   return userPayload;
 };
 
@@ -67,12 +67,13 @@ const createNewUser = async (req, res) => {
   let data;
   let statusCode;
   let message;
-  const email = req.body.email;
+  let email;
 
   try {
-    if (!isFormValid(req)) throw Error('Bad request');
-    
     const userPayload = hashForm(req);
+    email = req.body.email;
+    
+    if (!isFormValid(req)) throw Error('Bad request');
 
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne(
@@ -115,6 +116,7 @@ const createNewUser = async (req, res) => {
 
 const registrationMiddleware = {
   register: async (req, res) => {
+    req.body.role_id = req.body.role_id || 0;
     const { statusCode, ...rest } = await createNewUser(req, res);
     res.status(statusCode).send(rest);
   }
