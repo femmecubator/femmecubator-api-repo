@@ -103,7 +103,7 @@ const loginUser = async (req, res) => {
 };
 
 const loginMiddleware = {
-  register: async (req, res) => {
+  login: async (req, res) => {
     const { statusCode, ...rest } = await loginUser(req, res);
     res.status(statusCode).send(rest);
   },
