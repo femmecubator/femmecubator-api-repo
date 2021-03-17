@@ -116,7 +116,6 @@ const createNewUser = async (req, res) => {
 
 const registrationMiddleware = {
   register: async (req, res) => {
-    req.body.role_id = req.body.role_id || 2;
     const { statusCode, ...rest } = await createNewUser(req, res);
     res.status(statusCode).send(rest);
   }
