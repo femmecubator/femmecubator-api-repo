@@ -44,8 +44,8 @@ const isFormValid = ({ body }) => {
 const hashForm = ({ body }) => {
   const saltRounds = 10;
   body.email = body.email.toLowerCase();
-  const { password, ...rest } = body;
-  const userPayload = { password: bcrypt.hashSync(password, saltRounds), ...rest };
+  const { password, email, title, role_id, lastName, firstName } = body;
+  const userPayload = { password: bcrypt.hashSync(password, saltRounds), email, title, role_id, lastName, firstName };
   return userPayload;
 };
 
