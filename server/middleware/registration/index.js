@@ -45,7 +45,7 @@ const hashForm = ({ body }) => {
   const saltRounds = 10;
   body.email = body.email.toLowerCase();
   const { password, email, title, role_id, lastName, firstName } = body;
-  const userPayload = { password: bcrypt.hashSync(password, saltRounds), email, title, role_id, lastName, firstName };
+  const userPayload = { password: bcrypt.hashSync(password, saltRounds), email, title, role_id: parseInt(role_id), lastName, firstName };
   return userPayload;
 };
 
