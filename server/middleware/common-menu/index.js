@@ -80,7 +80,7 @@ const commonMenuMiddleware = {
       )
     );
     const { statusCode, ...rest } = await commonMenuService(
-      role_id,
+      parseInt(role_id),
       userName,
       title
     );
