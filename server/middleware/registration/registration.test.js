@@ -174,16 +174,20 @@ describe('registrationMiddleware', () => {
     const request = httpMocks.createRequest({
       method: 'POST',
       url: 'api/register',
-      body: {},
+      body: {
+        role_id: 1,
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "JANe_d@gmail.com",
+        title: "UX Designer",
+        password: "H@llo2021!",
+      },
     });
     const response = httpMocks.createResponse();
-    const expectedResp = {
-      data: {},
-      message: 'Gateway timeout',
-    };
+    const expectedResp = 'Gateway Timeout';
     await register(request, response);
 
     expect(response._getStatusCode()).toBe(504);
-    expect(response._getData()).toEqual(expectedResp);
+    expect(response._getData().message).toEqual(expectedResp);
   });
 });

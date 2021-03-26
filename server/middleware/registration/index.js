@@ -1,9 +1,8 @@
 const bcrypt = require('bcrypt');
 const {
   HttpStatusCodes: { StatusCodes },
-  DataException
 } = require('../../utils/constants');
-const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
+const { OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
 const JWT = require('jsonwebtoken');
 const { v4 } = require('uuid');
@@ -89,9 +88,8 @@ const createNewUser = async (req, res) => {
     const { _id, password, ...rest } = insertion.ops[0];
     data = rest;
     
-    if (!data) {
-      statusCode = REQUEST_TIMEOUT;
-      throw DataException(`Service Unavailable - There was a problem with your request. Please try again later`);
+    if (!data || TEST_TIMEOUT) {
+      throw Error('Gateway Timeout');
     } else {
       generateCookie(res, userPayload);
       statusCode = OK;
@@ -99,14 +97,14 @@ const createNewUser = async (req, res) => {
       registrationLogger.success(email);
     }
   } catch (error) {
-    if (error && !TEST_TIMEOUT) {
+    if (error.message !== 'Gateway Timeout') {
       registrationLogger.error(error, email);
       statusCode = statusCode || BAD_REQUEST;
       message = error.message;
     } else {
       registrationLogger.timeout(email);
       statusCode = GATEWAY_TIMEOUT;
-      message = 'Gateway timeout';
+      message = 'Gateway Timeout';
     }
   } finally {
     registrationLogger.end(email);
