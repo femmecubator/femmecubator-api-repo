@@ -10,6 +10,16 @@ jest.mock('cryptr', () => {
   });
 });
 
+jest.mock('./registrationLogger', () => {
+  const registrationLogger = {
+    end: jest.fn(),
+    success: jest.fn(),
+    error: jest.fn(),
+    timeout: jest.fn(),
+  }
+  return registrationLogger;
+});
+
 describe('registrationMiddleware', () => {
   const OLD_ENV = process.env;
   let client;
