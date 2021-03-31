@@ -11,13 +11,13 @@ router.post('/', timeout(TIMEOUT, { respond: true }), (req, res) => {
   // will put logic in middleware later
   // stub login api that responds with a cookie value
   const {
-    firstName,
-    lastName,
-    prefLoc,
+    // firstName,
+    // lastName,
+    // prefLoc,
     title,
     email,
     userName,
-    password,
+    // password,
   } = req.body;
 
   if (email.toLowerCase() === 'test1@femmecubator.com') {
