@@ -24,10 +24,10 @@ function corsHandler(req, res, next) {
 module.exports = () => {
   const app = express();
   app.use(corsHandler);
-  app.use(cookieParser());/*
+  app.use(cookieParser());
   app.use('/api/commonMenu', commonMenuRoutes);
   app.use('/api/encrypt', encryptRoutes);
   app.use('/api/login', loginRoutes);
-  app.use('/api/register', registerRoutes);*/
+  app.use('/api/register', registerRoutes);
   return app;
 };
