@@ -9,23 +9,25 @@ const { CORS_ORIGINS } = require('../utils/constants');
 
 function corsHandler(req, res, next) {
   const { origin } = req.headers;
-  console.log('origin#####', origin);
-  if (CORS_ORIGINS.includes(origin))
+  if (CORS_ORIGINS.includes(origin)) {
+    console.log('origin#####', origin);
     res.header('Access-Control-Allow-Origin', origin);
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET,PUT,POST,DELETE,UPDATE,OPTIONS'
-  );
-  res.header(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
-  );
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header(
+      'Access-Control-Allow-Methods',
+      'GET,PUT,POST,DELETE,UPDATE,OPTIONS'
+    );
+    res.header(
+      'Access-Control-Allow-Headers',
+      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
+    );
+  }
   return next();
 }
+
 module.exports = () => {
   const app = express();
-//   app.use(corsHandler);
+  app.use(corsHandler);
   app.use(cookieParser());
   app.use('/api/commonMenu', commonMenuRoutes);
   app.use('/api/encrypt', encryptRoutes);
