@@ -26,18 +26,21 @@ describe('common-menu middleware', () => {
     client = await mongoUtil.connect();
   });
   beforeEach(async () => {
+    jest.resetModules();
+    process.env = OLD_ENV;
     process.env.COMMON_MENU_COLLECTION = 'common-menu';
-    await mockMongoUtil.seed(client);
+
     request = httpMocks.createRequest({
       method: 'GET',
       url: 'api/common-menu',
     });
+    await mockMongoUtil.seed(client);
   });
   afterEach(async () => {
     await mockMongoUtil.drop(client)
   });
   afterAll(async () => {
-    client.close();
+    mongoUtil.close();
     process.env = OLD_ENV;
   });
   it('should return common menu API', async () => {
