@@ -10,7 +10,6 @@ const { CORS_ORIGINS } = require('../utils/constants');
 function corsHandler(req, res, next) {
   const { origin } = req.headers;
   if (CORS_ORIGINS.includes(origin)) {
-    console.log('origin#####', origin);
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', true);
     res.header(

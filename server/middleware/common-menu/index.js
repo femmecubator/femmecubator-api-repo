@@ -17,14 +17,14 @@ const commonMenuService = async (role_id, userName, title) => {
   let statusCode;
   let message;
   let collectionObj;
-  
+
   try {
     collectionObj = await mongoUtil.fetchCollection(
       process.env.COMMON_MENU_COLLECTION
     );
 
     data = await collectionObj.findOne(
-      { role_id: parseInt(role_id) },
+      { role_id },
       { projection: { _id: 0, address: 0 } }
     );
     if (!data) {
