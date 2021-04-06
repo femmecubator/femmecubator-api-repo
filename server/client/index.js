@@ -25,7 +25,7 @@ function corsHandler(req, res, next) {
 }
 module.exports = () => {
   const app = express();
-  app.use(corsHandler);
+//   app.use(corsHandler);
   app.use(cookieParser());
   app.use('/api/commonMenu', commonMenuRoutes);
   app.use('/api/encrypt', encryptRoutes);
