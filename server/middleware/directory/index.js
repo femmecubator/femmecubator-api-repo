@@ -17,7 +17,7 @@ const mentorsDirectory = [
     lastName: 'Banner',
     title: 'UI/UX',
     mentorSkills:
-      'Wireframing, Prototyping, User Research, Customer Journey, Persona',
+      'Smashing, Controlling Anger, User Research, Customer Journey, Persona',
     bio:
       'Lorem ipsum testing lines limited to an awesomely composed lead sentence or series of posts. Snappy, judgy, tyrannical. Compassionate or narcissistic. It is a placeholderawesomely composed lead sentence or series of posts. Snappy, judgy, tyrannical. Compassionate or narcissistic.Snappy, judgy, tyrannical. Compassionate or narcissistic. It is a placeholder  limited to 280 char text to a max of 5 Compassionate or narcissistic. It is a placeholder  limited to 280 char text to a max of 5 ',
     initials: 'BB',
