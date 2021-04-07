@@ -31,8 +31,8 @@ const mentorsDirectory = [
       'Powerful sorceress, User Research, Customer Journey, Persona',
     bio:
       'Lorem ipsum testing lines limited to an awesomely composed lead sentence or series of posts. Snappy, judgy, tyrannical. Compassionate or narcissistic. It is a placeholderawesomely composed lead sentence or series of posts. Snappy, judgy, tyrannical. Compassionate or narcissistic.Snappy, judgy, tyrannical. Compassionate or narcissistic. It is a placeholder  limited to 280 char text to a max of 5 Compassionate or narcissistic. It is a placeholder  limited to 280 char text to a max of 5 ',
-    initials: 'CD',
-    _id: 'cbv2flkasdf4',
+    initials: 'WM',
+    _id: 'cbv2flka4df4',
   },
   {
     firstName: 'Bruce',
