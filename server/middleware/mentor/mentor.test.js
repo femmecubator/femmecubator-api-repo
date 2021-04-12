@@ -11,6 +11,13 @@ jest.mock('cryptr', () => {
   });
 });
 
+jest.mock('simple-node-logger', () => ({
+  createSimpleLogger: jest.fn().mockReturnValue({
+    info: jest.fn(),
+    error: jest.fn(),
+  })
+}));
+
 describe('mentor middleware', () => {
   const OLD_ENV = process.env;
   let client;
