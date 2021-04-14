@@ -18,6 +18,7 @@ class MongoUtil {
   }
 
   async fetchCollection(collectionName) {
+    if (!this.client.isConnected()) await this.init();
     const collectionObj = this.db.collection(collectionName);
     return collectionObj;
   }
