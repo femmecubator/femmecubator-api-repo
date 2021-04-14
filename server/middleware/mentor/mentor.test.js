@@ -11,34 +11,42 @@ jest.mock('cryptr', () => {
   });
 });
 
+jest.mock('simple-node-logger', () => ({
+  createSimpleLogger: jest.fn().mockReturnValue({
+    info: jest.fn(),
+    error: jest.fn(),
+  })
+}));
+
 describe('mentor middleware', () => {
   const OLD_ENV = process.env;
-  let client;
   let request;
 
   beforeAll(async () => {
-    client = await mongoUtil.connect();
+    await mongoUtil.init();
   });
   beforeEach(async () => {
     jest.resetModules();
-    process.env = { ...OLD_ENV };
+    process.env = OLD_ENV;
+    process.env.USERS_COLLECTION = 'users';
+    process.env.COMMON_MENU_COLLECTION = 'common-menu';
 
     request = httpMocks.createRequest({
       method: 'GET',
       url: '/api/mentors',
     });
     
-    await mockMongoUtil.drop(client);
-    await mockMongoUtil.seed(client);
+    await mockMongoUtil.seed(mongoUtil);
   });
-  afterEach(async () => await mockMongoUtil.drop(client));
-  afterAll(() => {
-    mongoUtil.close();
+  afterEach(async () => {
+    await mockMongoUtil.drop(mongoUtil)
+  });
+  afterAll(async () => {
+    await mongoUtil.close();
     process.env = OLD_ENV;
   });
 
   it('should return list of all mentors and status 200', async () => {
-    process.env.USERS_COLLECTION = 'users';
     const response = httpMocks.createResponse({
       locals: {
         user: {
@@ -67,7 +75,6 @@ describe('mentor middleware', () => {
 
     
   it('should return no record found and status 404 if no mentors', async () => {
-    process.env.USERS_COLLECTION = 'users';
     const response = httpMocks.createResponse({
       locals: {
         user: {
@@ -81,7 +88,7 @@ describe('mentor middleware', () => {
     });
     const expectedResponse = { message: "No Record Found", data: [] };
     
-    await mockMongoUtil.dropMentors(client);
+    await mockMongoUtil.dropMentors(mongoUtil);
     await mentorMiddleware.getMentors(request, response);
     expect(response._getStatusCode()).toEqual(404);
     expect(response._getData()).toEqual(expectedResponse);
@@ -89,7 +96,7 @@ describe('mentor middleware', () => {
   
   it('should return status bad request using wrong role_id', async () => {
     process.env.USERS_COLLECTION = 'users';
-    mockMongoUtil.drop(client, process.env.USERS_COLLECTION);
+    mockMongoUtil.drop(mongoUtil);
 
     const response = httpMocks.createResponse({
       locals: {
