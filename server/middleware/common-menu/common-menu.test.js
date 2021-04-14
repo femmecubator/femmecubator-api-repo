@@ -19,11 +19,10 @@ jest.mock('simple-node-logger', () => ({
 
 describe('common-menu middleware', () => {
   const OLD_ENV = process.env;
-  let client;
   let request;
 
   beforeAll(async () => {
-    client = await mongoUtil.connect();
+    await mongoUtil.init();
   });
   beforeEach(async () => {
     jest.resetModules();
@@ -34,15 +33,16 @@ describe('common-menu middleware', () => {
       method: 'GET',
       url: 'api/common-menu',
     });
-    await mockMongoUtil.seed(client);
+    await mockMongoUtil.seed(mongoUtil);
   });
   afterEach(async () => {
-    await mockMongoUtil.drop(client)
+    await mockMongoUtil.drop(mongoUtil);
   });
   afterAll(async () => {
-    mongoUtil.close();
+    await mongoUtil.close();
     process.env = OLD_ENV;
   });
+
   it('should return common menu API', async () => {
     const response = httpMocks.createResponse({
       locals: {
@@ -55,7 +55,7 @@ describe('common-menu middleware', () => {
     });
     await commonMenuMiddleware.getMenuItems(request, response);
     expect(response._getStatusCode()).toBe(200);
-  }, 30000);
+  });
   it('should throw an exception', async () => {
     const response = httpMocks.createResponse({
       locals: {
