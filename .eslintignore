@@ -17,3 +17,4 @@ package-lock.json
 package.json
 *.test.js
 .eslintrc.json
+globalConfig.json
