@@ -4,30 +4,28 @@ const { SECRET_KEY, MONGO_DB_URL, FEMMECUBATOR_DB } = process.env;
 const cryptr = new Cryptr(SECRET_KEY);
 const url = cryptr.decrypt(MONGO_DB_URL);
 
-let client;
+class MongoUtil {
+  constructor() {
+    this.client = MongoClient(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  }
 
-const connect = async () => {
-  client = await MongoClient.connect(url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  return client;
-};
+  async init() {
+    await this.client.connect();
+    this.db = this.client.db(FEMMECUBATOR_DB);
+  }
 
-const getClient = async () => {
-  if (!client) await connect();
-  return client;
-};
+  async fetchCollection(collectionName) {
+    if (!this.client.isConnected()) await this.init();
+    const collectionObj = this.db.collection(collectionName);
+    return collectionObj;
+  }
 
-const fetchCollection = async (collectionName) => {
-  if (!client) await connect();
-  const db = client.db(FEMMECUBATOR_DB);
-  const collectionObj = db.collection(collectionName);
-  return collectionObj;
-};
+  async close() {
+    await this.client.close();
+  }
+}
 
-const close = () => {
-  client.close();
-};
-
-module.exports = { client: getClient, connect, close, fetchCollection };
+module.exports = new MongoUtil;

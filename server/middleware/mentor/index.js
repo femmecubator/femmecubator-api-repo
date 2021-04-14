@@ -18,7 +18,7 @@ const queryMentors = async ({ email, role_id }) => {
   let message;
   let collectionObj;
 
-  logger.isInfo(
+  logger.info(
     setLogDetails(
       'mentorMiddleware.getMentors',
       'Fetching metors data',
@@ -79,7 +79,7 @@ const queryMentors = async ({ email, role_id }) => {
       message = 'Gateway timeout';
     }
   } finally {
-    logger.isInfo(
+    logger.info(
       setLogDetails(
         'mentorMiddleware.getMentors',
         'End of queryMentors',

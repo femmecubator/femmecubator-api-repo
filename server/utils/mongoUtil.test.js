@@ -11,6 +11,13 @@ jest.mock('cryptr', () => {
   });
 });
 
+jest.mock('simple-node-logger', () => ({
+  createSimpleLogger: jest.fn().mockReturnValue({
+    info: jest.fn(),
+    error: jest.fn(),
+  })
+}))
+
 jest.mock('./mongoUtil');
 
 describe('mongoUtil', () => {
