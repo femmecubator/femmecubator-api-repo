@@ -38,14 +38,15 @@ describe('registrationMiddleware', () => {
   });
   beforeEach(async () => {
     jest.resetModules();
-    process.env = { ...OLD_ENV };
     response = httpMocks.createResponse();
     request = httpMocks.createRequest({
       method: 'POST',
       url: 'api/register',
     });
   });
-  afterEach(async () => await mockMongoUtil.drop(mongoUtil));
+  afterEach(async () => {
+    await mockMongoUtil.drop(mongoUtil);
+  });
   afterAll(() => {
     mongoUtil.close();
     process.env = OLD_ENV;
