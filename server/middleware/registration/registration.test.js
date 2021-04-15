@@ -22,17 +22,12 @@ jest.mock('./registrationLogger', () => {
 
 describe('registrationMiddleware', () => {
   const OLD_ENV = process.env;
-  let client;
 
-  beforeAll(async () => {
-    client = await mongoUtil.connect();
-  });
   beforeEach(async () => {
     jest.resetModules();
     process.env = { ...OLD_ENV };
-    await mockMongoUtil.drop(client);
   });
-  afterEach(async () => await mockMongoUtil.drop(client));
+  afterEach(async () => await mockMongoUtil.drop(mongoUtil));
   afterAll(() => {
     mongoUtil.close();
     process.env = OLD_ENV;
@@ -75,7 +70,7 @@ describe('registrationMiddleware', () => {
   test('should not add new user and return status 409 if email in use ', async () => {
     process.env.USERS_COLLECTION = 'users';
     process.env.SECRET_KEY = 'ABC123';
-    await mockMongoUtil.seed(client);
+    await mockMongoUtil.seed(mongoUtil);
 
     const data = {
       role_id: 1,
