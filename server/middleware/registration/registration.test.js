@@ -21,11 +21,29 @@ jest.mock('./registrationLogger', () => {
 });
 
 describe('registrationMiddleware', () => {
+  let request, response;
   const OLD_ENV = process.env;
+  const form = {
+    role_id: 1,
+    firstName: "Jane",
+    lastName: "Doe",
+    email: "JANe_d@gmail.com",
+    title: "UX Designer",
+    password: "H@llo2021!",
+  }
 
+  beforeAll(async () => {
+    process.env.USERS_COLLECTION = 'users';
+    process.env.SECRET_KEY = 'ABC123';
+  });
   beforeEach(async () => {
     jest.resetModules();
     process.env = { ...OLD_ENV };
+    response = httpMocks.createResponse();
+    request = httpMocks.createRequest({
+      method: 'POST',
+      url: 'api/register',
+    });
   });
   afterEach(async () => await mockMongoUtil.drop(mongoUtil));
   afterAll(() => {
@@ -34,27 +52,11 @@ describe('registrationMiddleware', () => {
   });
 
   test('should add new user, return cookie and status 200 ', async () => {
-    process.env.USERS_COLLECTION = 'users';
-    process.env.SECRET_KEY = 'ABC123';
+    const { role_id, firstName, lastName, email, title } = form;
+    request.body = form;
 
-    const data = {
-      role_id: 1,
-      firstName: "Jane",
-      lastName: "Doe",
-      email: "JANe_d@gmail.com",
-      title: "UX Designer",
-    }
-    const request = httpMocks.createRequest({
-      method: 'POST',
-      url: 'api/register',
-      body: {
-        ...data,
-        password: "H@llo2021!",
-      }
-    });
-    const response = httpMocks.createResponse();
     const expectedResp = {
-      data: { ...data, email: data.email.toLowerCase() },
+      data: { role_id, firstName, lastName, email: email.toLowerCase(), title },
       message: 'Success',
     };
     await register(request, response);
@@ -68,30 +70,13 @@ describe('registrationMiddleware', () => {
   });
 
   test('should not add new user and return status 409 if email in use ', async () => {
-    process.env.USERS_COLLECTION = 'users';
-    process.env.SECRET_KEY = 'ABC123';
-    await mockMongoUtil.seed(mongoUtil);
-
-    const data = {
-      role_id: 1,
-      firstName: "Jane",
-      lastName: "Doe",
-      email: "JANe_d@gmail.com",
-      title: "UX Designer",
-    }
-    const request = httpMocks.createRequest({
-      method: 'POST',
-      url: 'api/register',
-      body: {
-        ...data,
-        password: "H@llo2021!",
-      }
-    });
-    const response = httpMocks.createResponse();
+    request.body = form;
+    
     const expectedResp = {
       data: {},
       message: 'Email already in use',
     };
+    await mockMongoUtil.seed(mongoUtil);
     await register(request, response);
 
     expect(response._getStatusCode()).toEqual(409);
@@ -100,22 +85,15 @@ describe('registrationMiddleware', () => {
   });
 
   test('should return status 400 with empty form fields', async () => {
-    process.env.USERS_COLLECTION = 'users';
-    process.env.SECRET_KEY = 'ABC123';
-
-    const request = httpMocks.createRequest({
-      method: 'POST',
-      url: 'api/register',
-      body: {
-        role_id: '',
-        firstName: '',
-        lastName: '',
-        title: '',
-        email: '',
-        password: '',
-      }
-    });
-    const response = httpMocks.createResponse();
+    request.body = {
+      role_id: '',
+      firstName: '',
+      lastName: '',
+      title: '',
+      email: '',
+      password: '',
+    };
+    
     const expectedResp = {
       data: {},
       message: 'Bad request'
@@ -131,22 +109,8 @@ describe('registrationMiddleware', () => {
   });
 
   test('should return status 400 with invalid form fields', async () => {
-    process.env.USERS_COLLECTION = 'users';
-    process.env.SECRET_KEY = 'ABC123';
-
-    const request = httpMocks.createRequest({
-      method: 'POST',
-      url: 'api/register',
-      body: {
-        role_id: 1,
-        firstName: "Jane",
-        lastName: "Doe",
-        email: "JANe_dgmail.com",
-        title: "UX Designer",
-        password: "H@llo2021!",
-      }
-    });
-    const response = httpMocks.createResponse();
+    request.body = {...form, email: "JANe_dgmail.com"};
+    
     const expectedResp = {
       data: {},
       message: 'Bad request'
@@ -162,23 +126,9 @@ describe('registrationMiddleware', () => {
   });
 
   test('should return status 504', async () => {
-    process.env.USERS_COLLECTION = 'users';
-    process.env.SECRET_KEY = 'ABC123';
     process.env.TEST_TIMEOUT = true;
-
-    const request = httpMocks.createRequest({
-      method: 'POST',
-      url: 'api/register',
-      body: {
-        role_id: 1,
-        firstName: "Jane",
-        lastName: "Doe",
-        email: "JANe_d@gmail.com",
-        title: "UX Designer",
-        password: "H@llo2021!",
-      },
-    });
-    const response = httpMocks.createResponse();
+    request.body = form;
+    
     const expectedResp = 'Gateway Timeout';
     await register(request, response);
 
