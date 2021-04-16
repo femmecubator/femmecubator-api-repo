@@ -18,7 +18,7 @@ const forgotPassword = async (req, res) => {
   } catch (error) {
     // handle errors
   }
-}
+};
 
 const forgotPasswordMiddleware = {
   forgotPassword: async (req, res) => {
