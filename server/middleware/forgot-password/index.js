@@ -21,7 +21,7 @@ const generateRandomToken = () => {
   const buf = crypto.randomBytes(20);
   const token = buf.toString('hex');
   return token;
-}
+};
 
 const forgotPassword = async (req, res) => {
   try {
