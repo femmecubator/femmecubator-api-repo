@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const {
   HttpStatusCodes: { StatusCodes },
 } = require('../../utils/constants');
@@ -21,12 +21,15 @@ const isFormValid = ({ body }) => {
     'lastName',
     'title',
     'email',
-    'password'
+    'password',
   ];
-  
+
   for (let i = 0; i < formFields.length; i++) {
     const field = formFields[i];
-    if (!Object.hasOwnProperty.call(body, formFields[i]) || body[field].length === 0) {
+    if (
+      !Object.hasOwnProperty.call(body, formFields[i]) ||
+      body[field].length === 0
+    ) {
       return false;
     }
   }
@@ -37,14 +40,20 @@ const isFormValid = ({ body }) => {
   } else {
     return true;
   }
-
 };
 
 const hashForm = ({ body }) => {
   const saltRounds = 10;
   body.email = body.email.toLowerCase();
   const { password, email, title, role_id, lastName, firstName } = body;
-  const userPayload = { password: bcrypt.hashSync(password, saltRounds), email, title, role_id: parseInt(role_id), lastName, firstName };
+  const userPayload = {
+    password: bcrypt.hashSync(password, saltRounds),
+    email,
+    title,
+    role_id: parseInt(role_id),
+    lastName,
+    firstName,
+  };
   return userPayload;
 };
 
@@ -57,7 +66,10 @@ const generateCookie = (res, userPayload) => {
     path: '/',
     domain: DOMAIN || 'femmecubator.com',
   };
-  const token = JWT.sign({email, role_id, userName: `${firstName} ${lastName[0]}.`}, SECRET_KEY);
+  const token = JWT.sign(
+    { email, role_id, userName: `${firstName} ${lastName[0]}.` },
+    SECRET_KEY
+  );
   res.cookie('TOKEN', token, options).cookie('SESSIONID', v4(), options);
 };
 
@@ -71,13 +83,13 @@ const createNewUser = async (req, res) => {
   try {
     const userPayload = hashForm(req);
     email = req.body.email;
-    
+
     if (!isFormValid(req)) throw Error('Bad request');
 
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne(
       { email: email },
-      { projection: {email: 1} },
+      { projection: { email: 1 } }
     );
     if (userFound) {
       statusCode = 409;
@@ -87,7 +99,7 @@ const createNewUser = async (req, res) => {
     const insertion = await userCollection.insertOne(userPayload);
     const { _id, password, ...rest } = insertion.ops[0];
     data = rest;
-    
+
     if (!data || TEST_TIMEOUT) {
       throw Error('Gateway Timeout');
     } else {
@@ -116,8 +128,7 @@ const registrationMiddleware = {
   register: async (req, res) => {
     const { statusCode, ...rest } = await createNewUser(req, res);
     res.status(statusCode).send(rest);
-  }
+  },
 };
 
 module.exports = registrationMiddleware;
-
