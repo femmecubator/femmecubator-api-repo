@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const mongoUtil = require('../../utils/mongoUtil');
 const { USERS_COLLECTION } = process.env;
 
