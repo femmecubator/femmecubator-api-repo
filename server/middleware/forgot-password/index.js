@@ -1,7 +1,7 @@
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const mongoUtil = require('../../utils/mongoUtil');
-const { USERS_COLLECTION } = process.env;
+const nodeMailerUtil = require('../../utils/nodemailerUtil');
+const { USERS_COLLECTION, REACT_APP_BASE_URL } = process.env;
 
 const findUserAndSetResetToken = async ({ body: { email } }, resetPasswordToken, resetPasswordDate) => {
   const query = { email: email };
@@ -32,9 +32,14 @@ const forgotPassword = async (req, res) => {
     const user = await findUserAndSetResetToken(req, resetPasswordToken, resetPasswordDate);
 
     if (user) {
+      const resetLink = `${REACT_APP_BASE_URL}/reset?token=${resetPasswordToken}`;
+      nodeMailerUtil.sendMail('FORGOT_PASSWORD_VALID', req.body.email, {resetLink: resetLink});
       console.log('user exists', user);
+      console.log('link', resetLink);
+      return resetLink;
     } else {
-      console.log('user does not exist', user);
+      nodeMailerUtil.sendMail('FORGOT_PASSWORD_INVALID', req.body.email);
+      console.log('user does not exist');
     }
   } catch (error) {
     // handle errors
@@ -43,8 +48,11 @@ const forgotPassword = async (req, res) => {
 
 const forgotPasswordMiddleware = {
   forgotPassword: async (req, res) => {
-    await forgotPassword(req, res);
-    res.send('forgot password');
+    const data = await forgotPassword(req, res);
+    res.send(data);
+  },
+  resetPassword: async (req, res) => {
+
   },
 };
 
