@@ -35,7 +35,6 @@ const forgotPassword = async (req, res) => {
       const resetLink = `${REACT_APP_BASE_URL}/reset?token=${resetPasswordToken}`;
       nodeMailerUtil.sendMail('FORGOT_PASSWORD_VALID', req.body.email, {resetLink: resetLink});
       console.log('user exists', user);
-      console.log('link', resetLink);
       return resetLink;
     } else {
       nodeMailerUtil.sendMail('FORGOT_PASSWORD_INVALID', req.body.email);
