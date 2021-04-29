@@ -2,13 +2,16 @@ const express = require('express');
 const timeout = require('connect-timeout');
 const router = express.Router();
 const { TIMEOUT } = require('../../utils/constants');
-const JWT = require('jsonwebtoken');
-const registrationMiddleware = require('../../middleware/registration');
-router.use(express.json());
+const authMiddleware = require('../../middleware/auth');
+const directoryMiddleware = require('../../middleware/directory');
 
-router.post(
+
+router.get(
   '/',
   timeout(TIMEOUT, { respond: true }),
-  registrationMiddleware.register
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
+  directoryMiddleware.fetchDirectory
 );
+
 module.exports = router;
