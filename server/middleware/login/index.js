@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const {
   HttpStatusCodes: { StatusCodes },
   DataException,
@@ -7,6 +7,7 @@ const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
 const JWT = require('jsonwebtoken');
 const { v4 } = require('uuid');
+const authLogger = require('./authLogger');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -22,7 +23,6 @@ const isFormValid = ({ body }) => {
       return false;
     }
   });
-
   const emailPattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   if (!emailPattern.test(body.email)) {
     return false;
@@ -59,20 +59,18 @@ const loginUser = async (req, res) => {
 
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne({ email });
-
     if (!userFound) {
       statusCode = 409;
       throw Error('Wrong credentials');
     }
 
     const isMatch = await bcrypt.compare(sentPassword, userFound.password);
-
     if (!isMatch) {
       statusCode = 409;
       throw Error('Wrong credentials');
     }
 
-    const { _id, password, ...rest } = userFound.ops[0];
+    const { _id, password, ...rest } = userFound;
     data = rest;
 
     if (!data) {
@@ -84,20 +82,20 @@ const loginUser = async (req, res) => {
       generateCookie(res, data);
       statusCode = OK;
       message = 'Success';
-      //   loginLogger.success(email);
+      authLogger.success(email, 'login');
     }
   } catch (error) {
     if (error && !TEST_TIMEOUT) {
-      //   loginLogger.error(error, email);
+      authLogger.error(error, email, 'login');
       statusCode = statusCode || BAD_REQUEST;
       message = error.message;
     } else {
-      //   loginLogger.timeout(email);
+      authLogger.timeout(email, 'login');
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
     }
   } finally {
-    // loginLogger.end(email);
+    authLogger.end(email, 'login');
   }
   return resObj(statusCode, message, data);
 };
