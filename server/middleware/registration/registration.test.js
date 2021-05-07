@@ -16,7 +16,7 @@ jest.mock('./registrationLogger', () => {
     success: jest.fn(),
     error: jest.fn(),
     timeout: jest.fn(),
-  }
+  };
   return registrationLogger;
 });
 
@@ -30,7 +30,7 @@ describe('registrationMiddleware', () => {
     email: "JANe_d@gmail.com",
     title: "UX Designer",
     password: "H@llo2021!",
-  }
+  };
 
   beforeAll(async () => {
     process.env.USERS_COLLECTION = 'users';
