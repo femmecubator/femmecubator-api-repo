@@ -36,9 +36,8 @@ const loginUser = async (req, res) => {
   let sentPassword;
 
   try {
-    email = req.body.email;
+    email = req.body.email.toLowerCase();
     sentPassword = req.body.password;
-    console.log('REQRESTS', req.body);
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne({ email });
     if (!userFound) {
