@@ -15,22 +15,6 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const isFormValid = ({ body }) => {
-  const formFields = ['email', 'password'];
-
-  formFields.forEach((field) => {
-    if (!Object.hasOwnProperty.call(body, field) || body[field].length === 0) {
-      return false;
-    }
-  });
-  const emailPattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (!emailPattern.test(body.email)) {
-    return false;
-  } else {
-    return true;
-  }
-};
-
 const generateCookie = (res, userData) => {
   const { DOMAIN, SECRET_KEY } = process.env;
   const cookieExp = new Date(Date.now() + 8 * 3600000);
@@ -54,19 +38,17 @@ const loginUser = async (req, res) => {
   try {
     email = req.body.email;
     sentPassword = req.body.password;
-
-    if (!isFormValid(req)) throw Error('Bad request');
-
+    console.log('REQRESTS', req.body);
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne({ email });
     if (!userFound) {
-      statusCode = 409;
+      statusCode = 401;
       throw Error('Wrong credentials');
     }
 
     const isMatch = await bcrypt.compare(sentPassword, userFound.password);
     if (!isMatch) {
-      statusCode = 409;
+      statusCode = 401;
       throw Error('Wrong credentials');
     }
 
