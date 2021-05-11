@@ -1,5 +1,5 @@
 const logger = require('simple-node-logger').createSimpleLogger();
-const { setLogDetails } = require('../../utils/constants');
+const { setLogDetails } = require('./constants');
 
 const authLogger = {
     success: (email, path) => {
