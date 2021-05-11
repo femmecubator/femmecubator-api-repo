@@ -39,8 +39,10 @@ const loginUser = async (req, res) => {
   try {
     email = req.body.email.toLowerCase();
     sentPassword = req.body.password;
+
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-    const userFound = await userCollection.findOne({ email }, {projection: {_id: 0, password: 0}});
+    const userFound = await userCollection.findOne({ email }, {projection: {_id: 0}});
+
     if (!userFound) {
       statusCode = 401;
       throw Error('Wrong credentials');
@@ -54,7 +56,7 @@ const loginUser = async (req, res) => {
 
     const { _id, password, ...rest } = userFound;
     data = rest;
-
+    console.log("FROM THE LOGIN", data);
     if (!data) {
       statusCode = REQUEST_TIMEOUT;
       throw DataException(
