@@ -7,7 +7,7 @@ const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
 const JWT = require('jsonwebtoken');
 const { v4 } = require('uuid');
-const authLogger = require('./authLogger');
+const authLogger = require('../../utils/authLogger');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -23,6 +23,7 @@ const generateCookie = (res, userData) => {
     path: '/',
     domain: DOMAIN || 'femmecubator.com',
   };
+  console.log("from the back", userData);
   const token = JWT.sign(userData, SECRET_KEY);
   res.cookie('TOKEN', token, options).cookie('SESSIONID', v4(), options);
 };
@@ -39,7 +40,7 @@ const loginUser = async (req, res) => {
     email = req.body.email.toLowerCase();
     sentPassword = req.body.password;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-    const userFound = await userCollection.findOne({ email });
+    const userFound = await userCollection.findOne({ email }, {projection: {_id: 0, password: 0}});
     if (!userFound) {
       statusCode = 401;
       throw Error('Wrong credentials');
