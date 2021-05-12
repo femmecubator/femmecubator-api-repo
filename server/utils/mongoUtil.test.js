@@ -16,7 +16,7 @@ jest.mock('simple-node-logger', () => ({
     info: jest.fn(),
     error: jest.fn(),
   })
-}))
+}));
 
 jest.mock('./mongoUtil');
 
