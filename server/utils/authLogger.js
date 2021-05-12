@@ -2,38 +2,42 @@ const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails } = require('./constants');
 
 const authLogger = {
-    success: (email, path) => {
+    success: (email, middlewareInfo) => {
+        const {middlewarePath, subMiddleware} =  middlewareInfo;
         logger.info(
             setLogDetails(
-                `${path}Middleware.${path}`,
-                `User ${path} was successful`,
+                `${middlewarePath}Middleware.${subMiddleware}`,
+                `User ${subMiddleware} was successful`,
                 `email - ${email}`
             )
         );
     },
-    end: (email, path) =>{
+    end: (email, middlewareInfo) =>{
+        const {middlewarePath, subMiddleware} =  middlewareInfo;
         logger.info(
             setLogDetails(
-                `${path}Middleware.${path}`,
-                `End of ${path}`,
+                `${middlewarePath}Middleware.${subMiddleware}`,
+                `End of ${middlewarePath}`,
                 `email - ${email}`,
             )
         );
     },
-    error: (error, email, path) =>{
+    error: (error, email, middlewareInfo) =>{
+        const {middlewarePath, subMiddleware} =  middlewareInfo;
         logger.info(
             setLogDetails(
-                `${path}Middleware.${path}`,
+                `${middlewarePath}Middleware.${subMiddleware}`,
                 `${error.message}`,
                 `email - ${email}`
             )
         );
     },
-    timeout: (email, path) => {
+    timeout: (email, middlewareInfo) => {
+        const {middlewarePath, subMiddleware} =  middlewareInfo;
         logger.error(
             setLogDetails(
-                `${path}Middleware.${path}`,
-                `Connection timeout while ${path}ing user`,
+                `${middlewarePath}Middleware.${subMiddleware}`,
+                `Connection timeout while ${subMiddleware}ing user`,
                 `email - ${email}`
             )
         );

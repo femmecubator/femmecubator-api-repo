@@ -5,9 +5,8 @@ const {
 } = require('../../utils/constants');
 const { REQUEST_TIMEOUT, OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
-const JWT = require('jsonwebtoken');
-const { v4 } = require('uuid');
 const authLogger = require('../../utils/authLogger');
+const generateCookie = require('../../utils/generateCookie');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -15,18 +14,6 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const generateCookie = (res, userData) => {
-  const { DOMAIN, SECRET_KEY } = process.env;
-  const cookieExp = new Date(Date.now() + 8 * 3600000);
-  const options = {
-    expires: cookieExp,
-    path: '/',
-    domain: DOMAIN || 'femmecubator.com',
-  };
-  console.log("from the back", userData);
-  const token = JWT.sign(userData, SECRET_KEY);
-  res.cookie('TOKEN', token, options).cookie('SESSIONID', v4(), options);
-};
 
 const loginUser = async (req, res) => {
   const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
@@ -35,12 +22,17 @@ const loginUser = async (req, res) => {
   let message;
   let email;
   let sentPassword;
+  const loggerMiddleware = {
+    middlewarePath: 'login',
+    subMiddleware: 'login',
+  };
 
   try {
     email = req.body.email.toLowerCase();
     sentPassword = req.body.password;
 
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+
     const userFound = await userCollection.findOne({ email }, {projection: {_id: 0}});
 
     if (!userFound) {
@@ -56,7 +48,7 @@ const loginUser = async (req, res) => {
 
     const { _id, password, ...rest } = userFound;
     data = rest;
-    console.log("FROM THE LOGIN", data);
+
     if (!data) {
       statusCode = REQUEST_TIMEOUT;
       throw DataException(
@@ -66,20 +58,20 @@ const loginUser = async (req, res) => {
       generateCookie(res, data);
       statusCode = OK;
       message = 'Success';
-      authLogger.success(email, 'login');
+      authLogger.success(email, loggerMiddleware);
     }
   } catch (error) {
     if (error && !TEST_TIMEOUT) {
-      authLogger.error(error, email, 'login');
+      authLogger.error(error, email, loggerMiddleware);
       statusCode = statusCode || BAD_REQUEST;
       message = error.message;
     } else {
-      authLogger.timeout(email, 'login');
+      authLogger.timeout(email, loggerMiddleware);
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
     }
   } finally {
-    authLogger.end(email, 'login');
+    authLogger.end(email, loggerMiddleware);
   }
   return resObj(statusCode, message, data);
 };
