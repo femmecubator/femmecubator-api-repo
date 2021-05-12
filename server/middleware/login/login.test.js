@@ -10,7 +10,7 @@ jest.mock('cryptr', () => {
     });
 });
 // create a fake logger for inputs
-jest.mock('./authLogger', () => {
+jest.mock('../utils/authLogger', () => {
     const authLogger = {
         end: jest.fn(),
         success: jest.fn(),
@@ -28,6 +28,15 @@ describe('loginMiddleware', () => {
         email: 'ali@gmail.com',
         password: 'Abcd123!',
     };
+    const returnResponse = {
+        role_id: 1,
+        firstName: "Ali",
+        lastName: "Baba",
+        hasOnboarded: false,
+        email: "ali@gmail.com",
+        title: "Software Engineer",
+        password: "Abcd123!",
+    }
 
     beforeAll(async () => {
         process.env.USERS_COLLECTION = 'users';
@@ -53,12 +62,11 @@ describe('loginMiddleware', () => {
         process.env = OLD_ENV;
     });
 
-    test('Should Login Existing User, Return Cookie with status 200', async () => {
+    test('Should Login Existing User, Return Cookie with Status 200', async () => {
         const { email, password } = form;
         request.body = form;
-
-        const expectedResponse = {
-            data: {email: email.toLowerCase(), password: password},
+        response.body = {
+            data: { email: email, password: password},
             message: 'Success',
         };
         await login(request, response);
