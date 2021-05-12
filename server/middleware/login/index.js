@@ -30,7 +30,6 @@ const loginUser = async (req, res) => {
   try {
     email = req.body.email.toLowerCase();
     sentPassword = req.body.password;
-
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
 
     const userFound = await userCollection.findOne({ email }, {projection: {_id: 0}});
@@ -46,7 +45,7 @@ const loginUser = async (req, res) => {
       throw Error('Wrong credentials');
     }
 
-    const { _id, password, ...rest } = userFound;
+    const { password, ...rest } = userFound;
     data = rest;
 
     if (!data) {
@@ -77,6 +76,7 @@ const loginUser = async (req, res) => {
 };
 
 const loginMiddleware = {
+
   login: async (req, res) => {
     const { statusCode, ...rest } = await loginUser(req, res);
     res.status(statusCode).send(rest);
