@@ -2,14 +2,14 @@ const { login } = require('./index');
 const mongoUtil = require('../../utils/mongoUtil');
 const mockMongoUtil = require('../../utils/__mocks__/mockMongoClient');
 const httpMocks = require('node-mocks-http');
-// create a crypter to make a fake key for a fake db
+
 jest.mock('cryptr', () => {
     const mockPlainText = process.env.MONGO_URL;
     return jest.fn().mockImplementation(() => {
         return { decrypt: () => mockPlainText};
     });
 });
-// create a fake logger for inputs
+
 jest.mock('../../utils/authLogger', () => {
     const authLogger = {
         end: jest.fn(),
@@ -20,7 +20,6 @@ jest.mock('../../utils/authLogger', () => {
     return authLogger;
 });
 
-// create a fake login info
 describe('loginMiddleware', () => {
     let request, response;
     const OLD_ENV = process.env;
