@@ -31,15 +31,14 @@ const loginUser = async (req, res) => {
     email = req.body.email.toLowerCase();
     sentPassword = req.body.password;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-
     const userFound = await userCollection.findOne({ email }, {projection: {_id: 0}});
 
     if (!userFound) {
       statusCode = 401;
       throw Error('Wrong credentials');
     }
-
     const isMatch = await bcrypt.compare(sentPassword, userFound.password);
+    
     if (!isMatch) {
       statusCode = 401;
       throw Error('Wrong credentials');
