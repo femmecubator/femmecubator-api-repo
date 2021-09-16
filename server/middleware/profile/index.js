@@ -14,19 +14,17 @@ const resObj = (statusCode, message, data = {}) => ({
 const hashForm = ({ body }) => {
   body.email = body.email.toLowerCase();
   const { email, firstName, lastName, title, bio, skills, phone_no, timezone, meet_link } = body;
-  const userPayload = {
-    email,
-    firstName,
-    lastName,
-    title,
-    bio,
-    skills,
-    phone_no,
-    timezone,
-    meet_link,
-
+  return {
+    ...(email ? { email: email } : {}),
+    ...(firstName ? { firstName: firstName } : {}),
+    ...(lastName ? { lastName:lastName } : {}),
+    ...(title ? { title: title } : {}),
+    ...(bio ? { bio: bio } : {}),
+    ...(skills ? { skills:skills } : {}),
+    ...(phone_no ? { phone_no: phone_no } : {}),
+    ...(timezone ? { timezone: timezone } : {}),
+    ...(meet_link ? { meet_link:meet_link } : {}),
   };
-  return userPayload;
 };
 
 const updateProfileData = async (req, res) => {
@@ -36,18 +34,18 @@ const updateProfileData = async (req, res) => {
   let email;
   try {
     const userPayload = hashForm(req);
-    email = req.body.email.toLowerCase();
+    email = userPayload.email;
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const updateProfile = await userCollection.findOneAndUpdate(
       { email: email },
       { $set: userPayload }
     );
-    if (!updateProfile) {
+    if (!updateProfile.value) {
       statusCode = 401;
       throw Error('User does not exist!');
     }
-    const { _id, password, ...rest } = updateProfile;
+    const { _id, password, ...rest } = updateProfile.value;
     statusCode = OK;
     message = 'Success';
     data = rest;
