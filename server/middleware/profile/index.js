@@ -11,28 +11,46 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
+const hashForm = ({ body }) => {
+  body.email = body.email.toLowerCase();
+  const { email, firstName, lastName, title, bio, skills, phone_no, timezone, meet_link } = body;
+  const userPayload = {
+    email,
+    firstName,
+    lastName,
+    title,
+    bio,
+    skills,
+    phone_no,
+    timezone,
+    meet_link,
+
+  };
+  return userPayload;
+};
+
 const updateProfileData = async (req, res) => {
   let data;
   let statusCode;
   let message;
+  let email;
   try {
+    const userPayload = hashForm(req);
+    email = req.body.email.toLowerCase();
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-    if (userCollection) {
-      const updateProfile = await userCollection.findOneAndUpdate(
-        { email: req.body.email },
-        { $set: req.body }
-      );
-      if (updateProfile.lastErrorObject.updatedExisting) {
-        statusCode = OK;
-        message = 'Success';
-        updateProfile.lastErrorObject = undefined;
-        data = updateProfile;
-      } else {
-        statusCode = 401;
-        throw Error('User does not exist!');
-      }
+    const updateProfile = await userCollection.findOneAndUpdate(
+      { email: email },
+      { $set: userPayload }
+    );
+    if (!updateProfile) {
+      statusCode = 401;
+      throw Error('User does not exist!');
     }
+    const { _id, password, ...rest } = updateProfile;
+    statusCode = OK;
+    message = 'Success';
+    data = rest;
   } catch (err) {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
@@ -49,37 +67,35 @@ const updatePassword = async (req, res) => {
   let data;
   let statusCode;
   let message;
-  const { USERS_COLLECTION } = process.env;
+  let email;
+  const saltRounds = 10;
+  const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
   try {
+    email = req.body.email.toLowerCase();
+    let { currentPassword, newPassword } = req.body;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-    if (userCollection) {
-      const userData = await userCollection.findOne({ email: req.body.email });
-      if (userData) {
-        const isMatchPassword = await bcrypt.compare(
-          req.body.currentPassword,
-          userData.password
-        );
-        if (isMatchPassword) {
-          const hashedPassword = await bcrypt.hashSync(
-            req.body.newPassword,
-            10
-          );
-          if (hashedPassword) {
-            const updatePassword = await userCollection.findOneAndUpdate(
-              { email: req.body.email },
-              { $set: { password: hashedPassword } }
-            );
-            statusCode = OK;
-            message = 'Password updated successfully';
-            data = {};
-          }
-        } else {
-          statusCode = BAD_REQUEST;
-          throw Error('Wrong Password. Try Again');
-        }
+    const userData = await userCollection.findOne({ email: email });
+    if (!userData) {
+      statusCode = 401;
+      throw Error('User does not exist!');
+    }
+    const isMatchPassword = await bcrypt.compare(currentPassword, userData.password);
+    if (!isMatchPassword) {
+      statusCode = BAD_REQUEST;
+      throw Error('Wrong Password. Try Again');
+    }
+    const hashedPassword = await bcrypt.hashSync(newPassword, saltRounds);
+    if (hashedPassword) {
+      const updatePassword = await userCollection.findOneAndUpdate(
+        { email: req.body.email },
+        { $set: { password: hashedPassword } }
+      );
+      if (!updatePassword || TEST_TIMEOUT) {
+        throw Error('Gateway Timeout');
       } else {
-        statusCode = 401;
-        throw Error('User does not exist!');
+        statusCode = OK;
+        message = 'Password updated successfully';
+        data = {};
       }
     }
   } catch (err) {
