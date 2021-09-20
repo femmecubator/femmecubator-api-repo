@@ -32,8 +32,7 @@ const loginUser = async (req, res) => {
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
 
     const userFound = await userCollection.findOne(
-      { email },
-      { projection: { _id: 0 } }
+      { email }
     );
 
     if (!userFound) {

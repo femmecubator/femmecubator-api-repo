@@ -7,6 +7,7 @@ const mongoUtil = require('../../utils/mongoUtil');
 const JWT = require('jsonwebtoken');
 const { v4 } = require('uuid');
 const registrationLogger = require('./registrationLogger');
+const generateCookie = require('../../utils/generateCookie');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -57,23 +58,6 @@ const hashForm = ({ body }) => {
   return userPayload;
 };
 
-const generateCookie = (res, userPayload) => {
-  const { DOMAIN, SECRET_KEY } = process.env;
-  const { email, role_id, firstName, lastName } = userPayload;
-  const user_id = userPayload._id
-  const cookieExp = new Date(Date.now() + 8 * 3600000);
-  const options = {
-    expires: cookieExp,
-    path: '/',
-    domain: DOMAIN || 'femmecubator.com',
-  };
-  const token = JWT.sign(
-    { user_id, email, role_id, userName: `${firstName} ${lastName[0]}.` },
-    SECRET_KEY
-  );
-  res.cookie('TOKEN', token, options).cookie('SESSIONID', v4(), options);
-};
-
 const createNewUser = async (req, res) => {
   const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
   let data;
@@ -98,7 +82,7 @@ const createNewUser = async (req, res) => {
     }
 
     const insertion = await userCollection.insertOne(userPayload);
-    const { _id, password, ...rest } = insertion.ops[0];
+    const { password, ...rest } = insertion.ops[0];
     data = rest;
 
     if (!data || TEST_TIMEOUT) {
