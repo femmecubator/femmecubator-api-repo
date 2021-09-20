@@ -36,6 +36,6 @@ module.exports = () => {
   app.use('/api/register', registerRoutes);
   app.use('/api/mentors', mentorRoutes);
   app.use('/api/directory', directoryRoutes);
-  app.use('/api/updateProfile', profileRoutes);
+  app.use('/api/profile', profileRoutes);
   return app;
 };

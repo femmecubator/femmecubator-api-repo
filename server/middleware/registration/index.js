@@ -35,7 +35,8 @@ const isFormValid = ({ body }) => {
     }
   }
 
-  const emailPattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const emailPattern =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   if (!emailPattern.test(body.email)) {
     return false;
   } else {
@@ -89,8 +90,7 @@ const createNewUser = async (req, res) => {
     if (!data || TEST_TIMEOUT) {
       throw Error('Gateway Timeout');
     } else {
-      //generateCookie(res, userPayload);
-      generateCookie(res, insertion);
+      generateCookie(res, data);
       statusCode = OK;
       message = 'Success';
       registrationLogger.success(email);

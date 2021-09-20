@@ -8,7 +8,7 @@ const authMiddleware = require('../../middleware/auth');
 router.use(express.json());
 
 router.post(
-  '/',
+  '/updateProfile',
   timeout(TIMEOUT, { respond: true }),
   authMiddleware.validateCookie,
   authMiddleware.errorHandler,
@@ -20,6 +20,13 @@ router.post(
   authMiddleware.validateCookie,
   authMiddleware.errorHandler,
   profileMiddleWares.updatePassword
+);
+router.get(
+  '/getProfileData',
+  timeout(TIMEOUT, { respond: true }),
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
+  profileMiddleWares.getProfileData
 );
 
 module.exports = router;

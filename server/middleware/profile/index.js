@@ -4,6 +4,7 @@ const {
 const { OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
 const bcrypt = require('bcryptjs');
+const generateCookie = require('../../utils/generateCookie');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -12,40 +13,51 @@ const resObj = (statusCode, message, data = {}) => ({
 });
 
 const createPayload = ({ body }) => {
-  body.email = body.email.toLowerCase();
-  const { email, firstName, lastName, title, bio, skills, phone, timezone, googlemeet } = body;
+  const {
+    email,
+    firstName,
+    lastName,
+    title,
+    bio,
+    skills,
+    phone,
+    timezone,
+    googlemeet,
+    hasOnboarded,
+  } = body;
   return {
-    ...(email ? { email: email } : {}),
+    ...(email ? { email: email.toLowerCase() } : {}),
     ...(firstName ? { firstName: firstName } : {}),
-    ...(lastName ? { lastName:lastName } : {}),
+    ...(lastName ? { lastName: lastName } : {}),
     ...(title ? { title: title } : {}),
     ...(bio ? { bio: bio } : {}),
-    ...(skills ? { skills:skills } : {}),
+    ...(skills ? { skills: skills } : {}),
     ...(phone ? { phone: phone } : {}),
     ...(timezone ? { timezone: timezone } : {}),
-    ...(googlemeet ? { googlemeet:googlemeet } : {}),
+    ...(googlemeet ? { googlemeet: googlemeet } : {}),
+    ...(hasOnboarded ? { hasOnboarded: hasOnboarded } : {}),
   };
 };
 
-const updateProfileData = async (req, res) => {
+const updateProfileData = async (req, res, tokenData) => {
   let data;
   let statusCode;
   let message;
-  let email;
   try {
     const userPayload = createPayload(req);
-    email = userPayload.email;
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const updateProfile = await userCollection.findOneAndUpdate(
-      { email: email },
-      { $set: userPayload }
+      { email: tokenData.email },
+      { $set: userPayload },
+      { returnOriginal: false }
     );
     if (!updateProfile.value) {
       statusCode = 401;
       throw Error('User does not exist!');
     }
-    const { _id, password, ...rest } = updateProfile.value;
+    const { password, ...rest } = updateProfile.value;
+    generateCookie(res, rest);
     statusCode = OK;
     message = 'Success';
     data = rest;
@@ -61,23 +73,24 @@ const updateProfileData = async (req, res) => {
   return resObj(statusCode, message, data);
 };
 
-const updatePassword = async (req, res) => {
+const updatePassword = async (req, res, tokenData) => {
   let data;
   let statusCode;
   let message;
-  let email;
   const saltRounds = 10;
   const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
   try {
-    email = req.body.email.toLowerCase();
     let { currentPassword, newPassword } = req.body;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-    const userData = await userCollection.findOne({ email: email });
+    const userData = await userCollection.findOne({ email: tokenData.email });
     if (!userData) {
       statusCode = 401;
       throw Error('User does not exist!');
     }
-    const isMatchPassword = await bcrypt.compare(currentPassword, userData.password);
+    const isMatchPassword = await bcrypt.compare(
+      currentPassword,
+      userData.password
+    );
     if (!isMatchPassword) {
       statusCode = BAD_REQUEST;
       throw Error('Wrong Password. Try Again');
@@ -107,14 +120,53 @@ const updatePassword = async (req, res) => {
   }
   return resObj(statusCode, message, data);
 };
-
+const getProfileData = async (req, res, tokenData) => {
+  let data;
+  let statusCode;
+  let message;
+  try {
+    const { USERS_COLLECTION } = process.env;
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const profileData = await userCollection.findOne({
+      email: tokenData.email,
+    });
+    if (!profileData) {
+      statusCode = 401;
+      throw Error('User does not exist!');
+    }
+    profileData.password = undefined;
+    statusCode = OK;
+    message = 'Success';
+    data = profileData;
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
 const profileMiddleware = {
   updateProfile: async (req, res) => {
-    const { statusCode, ...rest } = await updateProfileData(req, res);
+    var tokenData = res.locals.user;
+    const { statusCode, ...rest } = await updateProfileData(
+      req,
+      res,
+      tokenData
+    );
     res.status(statusCode).send(rest);
   },
   updatePassword: async (req, res) => {
-    const { statusCode, ...rest } = await updatePassword(req, res);
+    var tokenData = res.locals.user;
+    const { statusCode, ...rest } = await updatePassword(req, res, tokenData);
+    res.status(statusCode).send(rest);
+  },
+  getProfileData: async (req, res) => {
+    var tokenData = res.locals.user;
+    const { statusCode, ...rest } = await getProfileData(req, res, tokenData);
     res.status(statusCode).send(rest);
   },
 };
