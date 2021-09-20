@@ -11,9 +11,9 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const hashForm = ({ body }) => {
+const createPayload = ({ body }) => {
   body.email = body.email.toLowerCase();
-  const { email, firstName, lastName, title, bio, skills, phone_no, timezone, meet_link } = body;
+  const { email, firstName, lastName, title, bio, skills, phone, timezone, googlemeet } = body;
   return {
     ...(email ? { email: email } : {}),
     ...(firstName ? { firstName: firstName } : {}),
@@ -21,9 +21,9 @@ const hashForm = ({ body }) => {
     ...(title ? { title: title } : {}),
     ...(bio ? { bio: bio } : {}),
     ...(skills ? { skills:skills } : {}),
-    ...(phone_no ? { phone_no: phone_no } : {}),
+    ...(phone ? { phone: phone } : {}),
     ...(timezone ? { timezone: timezone } : {}),
-    ...(meet_link ? { meet_link:meet_link } : {}),
+    ...(googlemeet ? { googlemeet:googlemeet } : {}),
   };
 };
 
@@ -33,7 +33,7 @@ const updateProfileData = async (req, res) => {
   let message;
   let email;
   try {
-    const userPayload = hashForm(req);
+    const userPayload = createPayload(req);
     email = userPayload.email;
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);

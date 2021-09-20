@@ -60,6 +60,7 @@ const hashForm = ({ body }) => {
 const generateCookie = (res, userPayload) => {
   const { DOMAIN, SECRET_KEY } = process.env;
   const { email, role_id, firstName, lastName } = userPayload;
+  const user_id = userPayload._id
   const cookieExp = new Date(Date.now() + 8 * 3600000);
   const options = {
     expires: cookieExp,
@@ -67,7 +68,7 @@ const generateCookie = (res, userPayload) => {
     domain: DOMAIN || 'femmecubator.com',
   };
   const token = JWT.sign(
-    { email, role_id, userName: `${firstName} ${lastName[0]}.` },
+    { user_id, email, role_id, userName: `${firstName} ${lastName[0]}.` },
     SECRET_KEY
   );
   res.cookie('TOKEN', token, options).cookie('SESSIONID', v4(), options);
@@ -103,7 +104,8 @@ const createNewUser = async (req, res) => {
     if (!data || TEST_TIMEOUT) {
       throw Error('Gateway Timeout');
     } else {
-      generateCookie(res, userPayload);
+      //generateCookie(res, userPayload);
+      generateCookie(res, insertion);
       statusCode = OK;
       message = 'Success';
       registrationLogger.success(email);
