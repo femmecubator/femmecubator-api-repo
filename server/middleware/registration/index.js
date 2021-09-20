@@ -54,6 +54,7 @@ const hashForm = ({ body }) => {
     role_id: parseInt(role_id),
     lastName,
     firstName,
+    hasOnboarded: false,
   };
   return userPayload;
 };
