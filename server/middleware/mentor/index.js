@@ -45,6 +45,17 @@ const updateMentorInfo = async (req, res, tokenData) => {
       statusCode = 401;
       throw Error('User does not exist!');
     }
+    if (req.body.hasOnboarded) {
+      const { USERS_COLLECTION } = process.env;
+      const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+      const updateUser = await userCollection.findOneAndUpdate(
+        { email: tokenData.email },
+        { $set: { "hasOnboarded": true } },
+        { returnOriginal: false }
+      );
+      const { password, ...rest } = updateUser.value;
+      generateCookie(res, rest);
+    }
     const { password, ...rest } = updateProfile.value;
     statusCode = OK;
     message = 'Success';
