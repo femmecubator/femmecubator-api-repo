@@ -12,18 +12,14 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const createPayload = ( body ) => {
-  const {
-    email,
-    firstName,
-    lastName,
-    title
-  } = body;
+const createPayload = (body) => {
+  const { email, firstName, lastName, title, hasOnboarded } = body;
   return {
     ...(email ? { email: email.toLowerCase() } : {}),
     ...(firstName ? { firstName: firstName } : {}),
     ...(lastName ? { lastName: lastName } : {}),
-    ...(title ? { title: title } : {})
+    ...(title ? { title: title } : {}),
+    ...(hasOnboarded ? { hasOnboarded: hasOnboarded } : {}),
   };
 };
 

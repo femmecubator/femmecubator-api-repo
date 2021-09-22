@@ -14,15 +14,7 @@ const resObj = (statusCode, message, data = {}) => ({
 });
 
 const createPayload = (body, mentor_id) => {
-  const {
-    bio,
-    skills,
-    phone,
-    timezone,
-    googlemeet,
-    hasOnboarded,
-    timeslot
-  } = body;
+  const { bio, skills, phone, timezone, googlemeet, timeslot } = body;
   return {
     ...(mentor_id ? { mentor_id: mentor_id } : {}),
     ...(bio ? { bio: bio } : {}),
@@ -30,7 +22,6 @@ const createPayload = (body, mentor_id) => {
     ...(phone ? { phone: phone } : {}),
     ...(timezone ? { timezone: timezone } : {}),
     ...(googlemeet ? { googlemeet: googlemeet } : {}),
-    ...(hasOnboarded ? { hasOnboarded: hasOnboarded } : {}),
     ...(timeslot ? { timeslot: timeslot } : {}),
   };
 };
@@ -42,7 +33,9 @@ const updateMentorInfo = async (req, res, tokenData) => {
   try {
     const mentorPayload = createPayload(req.body, tokenData.user_id);
     const { MENTORS_COLLECTION } = process.env;
-    const mentorCollection = await mongoUtil.fetchCollection(MENTORS_COLLECTION);
+    const mentorCollection = await mongoUtil.fetchCollection(
+      MENTORS_COLLECTION
+    );
     const updateProfile = await mentorCollection.findOneAndUpdate(
       { mentor_id: tokenData.user_id },
       { $set: mentorPayload },
@@ -53,7 +46,6 @@ const updateMentorInfo = async (req, res, tokenData) => {
       throw Error('User does not exist!');
     }
     const { password, ...rest } = updateProfile.value;
-    generateCookie(res, rest);
     statusCode = OK;
     message = 'Success';
     data = rest;
@@ -74,7 +66,9 @@ const getMentorInfo = async ({ mentor_id }) => {
   let message;
   try {
     const { MENTORS_COLLECTION } = process.env;
-    const mentorCollection = await mongoUtil.fetchCollection(MENTORS_COLLECTION);
+    const mentorCollection = await mongoUtil.fetchCollection(
+      MENTORS_COLLECTION
+    );
     const profileData = await mentorCollection.findOne({
       mentor_id: mentor_id,
     });
@@ -179,7 +173,7 @@ const mentorMiddleware = {
     const { statusCode, ...rest } = await queryMentors(res.locals.user);
     res.status(statusCode).send(rest);
   },
-  getMentors: async (req, res) => {
+  getMentorsProfile: async (req, res) => {
     const { statusCode, ...rest } = await getMentorInfo(res.locals.user);
     res.status(statusCode).send(rest);
   },
