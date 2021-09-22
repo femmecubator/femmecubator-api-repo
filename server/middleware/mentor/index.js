@@ -138,42 +138,38 @@ const getMentorInfo = async ({ user_id }) => {
   }
   return resObj(statusCode, message, data);
 };
-const queryMentors = async ({ email, role_id }) => {
+const queryMentors = async () => {
   let data;
   let statusCode;
   let message;
   let collectionObj;
 
-  logger.info(
-    setLogDetails(
-      'mentorMiddleware.getMentors',
-      'Fetching metors data',
-      `User - ${email}`
-    )
-  );
-
   try {
-    if (role_id !== 1 && role_id !== 0) throw Error('Bad request');
 
     collectionObj = await mongoUtil.fetchCollection(
-      process.env.USERS_COLLECTION
+      process.env.MENTORS_COLLECTION
     );
-
-    data = await collectionObj
-      .find(
-        { role_id: 0 },
-        {
-          projection: {
-            _id: 0,
-            firstName: 1,
-            lastName: 1,
-            title: 1,
-            skills: 1,
-            bio: 1,
-          },
+    data = await collectionObj.aggregate([
+      {
+        $lookup: {
+          from: `users`,
+          let: { mentor_id: { "$toObjectId": "$mentor_id" } },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$mentor_id"] } } },
+            {
+              $project: {
+                firstName: "$firstName",
+                lastName: "$lastName",
+                email: "$email",
+                title: "$title",
+                _id: 0
+              },
+            },
+          ],
+          as: "userInfo",
         }
-      )
-      .toArray();
+      },
+    ]).toArray();
 
     if (!data.length) {
       statusCode = NOT_FOUND;
@@ -183,42 +179,20 @@ const queryMentors = async ({ email, role_id }) => {
       message = 'Success';
     }
   } catch (error) {
-    if (error && role_id !== 100) {
-      logger.error(
-        setLogDetails(
-          'mentorMiddleware.getMentors',
-          'Failed to fetch mentors data',
-          `User - ${email}`
-        )
-      );
+    if (error) {
       statusCode = BAD_REQUEST;
       message = error.message;
     } else {
-      logger.error(
-        setLogDetails(
-          'mentorMiddleware.getMentors',
-          'Connection timed out while fetching mentors data',
-          `User - ${email}`
-        )
-      );
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
     }
-  } finally {
-    logger.info(
-      setLogDetails(
-        'mentorMiddleware.getMentors',
-        'End of queryMentors',
-        `User - ${email}`
-      )
-    );
   }
   return resObj(statusCode, message, data);
 };
 
 const mentorMiddleware = {
   getMentors: async (req, res) => {
-    const { statusCode, ...rest } = await queryMentors(res.locals.user);
+    const { statusCode, ...rest } = await queryMentors();
     res.status(statusCode).send(rest);
   },
   getMentorsProfile: async (req, res) => {
