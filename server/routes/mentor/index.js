@@ -4,6 +4,7 @@ const router = express.Router();
 const { TIMEOUT } = require('../../utils/constants');
 const mentorMiddleware = require('../../middleware/mentor');
 const authMiddleware = require('../../middleware/auth');
+router.use(express.json());
 
 router.get(
   '/',

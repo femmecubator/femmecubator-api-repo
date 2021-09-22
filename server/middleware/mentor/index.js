@@ -26,6 +26,48 @@ const createPayload = (body, mentor_id) => {
   };
 };
 
+const saveMentorInfo = async (req, res, tokenData) => {
+  let data;
+  let statusCode;
+  let message;
+  const { USERS_COLLECTION } = process.env;
+  const { MENTORS_COLLECTION } = process.env;
+
+  try {
+    const mentorPayload = createPayload(req.body, tokenData.user_id);
+    const mentorCollection = await mongoUtil.fetchCollection(
+      MENTORS_COLLECTION
+    );
+    const saveInfo = await mentorCollection.insertOne(mentorPayload);
+    const { password, ...rest } = saveInfo.ops[0];
+    data = rest;
+    if (!data) {
+      throw Error('Something went wrong!');
+    } else {
+      statusCode = OK;
+      message = 'Success';
+    }
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const updateUser = await userCollection.findOneAndUpdate(
+      { email: tokenData.email },
+      { $set: { hasOnboarded: true } },
+      { returnOriginal: false }
+    );
+    const { pass, ...value } = updateUser.value;
+    generateCookie(res, value);
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  console.log(statusCode, message, data);
+  return { statusCode, message, data };
+};
+
 const updateMentorInfo = async (req, res, tokenData) => {
   let data;
   let statusCode;
@@ -36,30 +78,25 @@ const updateMentorInfo = async (req, res, tokenData) => {
     const mentorCollection = await mongoUtil.fetchCollection(
       MENTORS_COLLECTION
     );
-    const updateProfile = await mentorCollection.findOneAndUpdate(
-      { mentor_id: tokenData.user_id },
-      { $set: mentorPayload },
-      { upsert: true }
-    );
-    if (!updateProfile.value) {
-      statusCode = 401;
-      throw Error('User does not exist!');
-    }
     if (req.body.hasOnboarded) {
-      const { USERS_COLLECTION } = process.env;
-      const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-      const updateUser = await userCollection.findOneAndUpdate(
-        { email: tokenData.email },
-        { $set: { "hasOnboarded": true } },
-        { returnOriginal: false }
+      const result = await saveMentorInfo(req, res, tokenData);
+      data = result.data;
+      statusCode = result.statusCode;
+      message = result.message;
+    } else {
+      const updateProfile = await mentorCollection.findOneAndUpdate(
+        { mentor_id: tokenData.user_id },
+        { $set: mentorPayload }
       );
-      const { password, ...rest } = updateUser.value;
-      generateCookie(res, rest);
+      if (!updateProfile.value) {
+        statusCode = 401;
+        throw Error('User does not exist!');
+      }
+      const { password, ...rest } = updateProfile.value;
+      statusCode = OK;
+      message = 'Success';
+      data = rest;
     }
-    const { password, ...rest } = updateProfile.value;
-    statusCode = OK;
-    message = 'Success';
-    data = rest;
   } catch (err) {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
@@ -71,7 +108,7 @@ const updateMentorInfo = async (req, res, tokenData) => {
   }
   return resObj(statusCode, message, data);
 };
-const getMentorInfo = async ({ mentor_id }) => {
+const getMentorInfo = async ({ user_id }) => {
   let data;
   let statusCode;
   let message;
@@ -81,7 +118,7 @@ const getMentorInfo = async ({ mentor_id }) => {
       MENTORS_COLLECTION
     );
     const profileData = await mentorCollection.findOne({
-      mentor_id: mentor_id,
+      mentor_id: user_id,
     });
     if (!profileData) {
       statusCode = 401;
