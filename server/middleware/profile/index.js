@@ -12,30 +12,18 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-const createPayload = ({ body }) => {
+const createPayload = ( body ) => {
   const {
     email,
     firstName,
     lastName,
-    title,
-    bio,
-    skills,
-    phone,
-    timezone,
-    googlemeet,
-    hasOnboarded,
+    title
   } = body;
   return {
     ...(email ? { email: email.toLowerCase() } : {}),
     ...(firstName ? { firstName: firstName } : {}),
     ...(lastName ? { lastName: lastName } : {}),
-    ...(title ? { title: title } : {}),
-    ...(bio ? { bio: bio } : {}),
-    ...(skills ? { skills: skills } : {}),
-    ...(phone ? { phone: phone } : {}),
-    ...(timezone ? { timezone: timezone } : {}),
-    ...(googlemeet ? { googlemeet: googlemeet } : {}),
-    ...(hasOnboarded ? { hasOnboarded: hasOnboarded } : {}),
+    ...(title ? { title: title } : {})
   };
 };
 
@@ -44,7 +32,7 @@ const updateProfileData = async (req, res, tokenData) => {
   let statusCode;
   let message;
   try {
-    const userPayload = createPayload(req);
+    const userPayload = createPayload(req.body);
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const updateProfile = await userCollection.findOneAndUpdate(
@@ -120,7 +108,7 @@ const updatePassword = async (req, res, tokenData) => {
   }
   return resObj(statusCode, message, data);
 };
-const getProfileData = async (req, res, tokenData) => {
+const getProfileData = async ({ email }) => {
   let data;
   let statusCode;
   let message;
@@ -128,7 +116,7 @@ const getProfileData = async (req, res, tokenData) => {
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const profileData = await userCollection.findOne({
-      email: tokenData.email,
+      email: email,
     });
     if (!profileData) {
       statusCode = 401;
@@ -166,7 +154,7 @@ const profileMiddleware = {
   },
   getProfileData: async (req, res) => {
     var tokenData = res.locals.user;
-    const { statusCode, ...rest } = await getProfileData(req, res, tokenData);
+    const { statusCode, ...rest } = await getProfileData(tokenData);
     res.status(statusCode).send(rest);
   },
 };

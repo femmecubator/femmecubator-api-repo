@@ -4,6 +4,7 @@ const {
   setLogDetails,
 } = require('../../utils/constants');
 const mongoUtil = require('../../utils/mongoUtil');
+const generateCookie = require('../../utils/generateCookie');
 
 const { OK, BAD_REQUEST, NOT_FOUND, GATEWAY_TIMEOUT } = StatusCodes;
 const resObj = (statusCode, message, data = {}) => ({
@@ -12,6 +13,89 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
+const createPayload = (body, mentor_id) => {
+  const {
+    bio,
+    skills,
+    phone,
+    timezone,
+    googlemeet,
+    hasOnboarded,
+    timeslot
+  } = body;
+  return {
+    ...(mentor_id ? { mentor_id: mentor_id } : {}),
+    ...(bio ? { bio: bio } : {}),
+    ...(skills ? { skills: skills } : {}),
+    ...(phone ? { phone: phone } : {}),
+    ...(timezone ? { timezone: timezone } : {}),
+    ...(googlemeet ? { googlemeet: googlemeet } : {}),
+    ...(hasOnboarded ? { hasOnboarded: hasOnboarded } : {}),
+    ...(timeslot ? { timeslot: timeslot } : {}),
+  };
+};
+
+const updateMentorInfo = async (req, res, tokenData) => {
+  let data;
+  let statusCode;
+  let message;
+  try {
+    const mentorPayload = createPayload(req.body, tokenData.user_id);
+    const { MENTORS_COLLECTION } = process.env;
+    const mentorCollection = await mongoUtil.fetchCollection(MENTORS_COLLECTION);
+    const updateProfile = await mentorCollection.findOneAndUpdate(
+      { mentor_id: tokenData.user_id },
+      { $set: mentorPayload },
+      { upsert: true }
+    );
+    if (!updateProfile.value) {
+      statusCode = 401;
+      throw Error('User does not exist!');
+    }
+    const { password, ...rest } = updateProfile.value;
+    generateCookie(res, rest);
+    statusCode = OK;
+    message = 'Success';
+    data = rest;
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
+const getMentorInfo = async ({ mentor_id }) => {
+  let data;
+  let statusCode;
+  let message;
+  try {
+    const { MENTORS_COLLECTION } = process.env;
+    const mentorCollection = await mongoUtil.fetchCollection(MENTORS_COLLECTION);
+    const profileData = await mentorCollection.findOne({
+      mentor_id: mentor_id,
+    });
+    if (!profileData) {
+      statusCode = 401;
+      throw Error('User does not exist!');
+    }
+    statusCode = OK;
+    message = 'Success';
+    data = profileData;
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
 const queryMentors = async ({ email, role_id }) => {
   let data;
   let statusCode;
@@ -93,6 +177,15 @@ const queryMentors = async ({ email, role_id }) => {
 const mentorMiddleware = {
   getMentors: async (req, res) => {
     const { statusCode, ...rest } = await queryMentors(res.locals.user);
+    res.status(statusCode).send(rest);
+  },
+  getMentors: async (req, res) => {
+    const { statusCode, ...rest } = await getMentorInfo(res.locals.user);
+    res.status(statusCode).send(rest);
+  },
+  updateMentor: async (req, res) => {
+    var tokenData = res.locals.user;
+    const { statusCode, ...rest } = await updateMentorInfo(req, res, tokenData);
     res.status(statusCode).send(rest);
   },
 };
