@@ -14,7 +14,7 @@ const resObj = (statusCode, message, data = {}) => ({
 });
 
 const createPayload = (body, mentor_id) => {
-  const { bio, skills, phone, timezone, googlemeet, timeslot } = body;
+  const { bio, skills, phone, timezone, googlemeet, timeSlot } = body;
   return {
     ...(mentor_id ? { mentor_id: mentor_id } : {}),
     ...(bio ? { bio: bio } : {}),
@@ -22,7 +22,7 @@ const createPayload = (body, mentor_id) => {
     ...(phone ? { phone: phone } : {}),
     ...(timezone ? { timezone: timezone } : {}),
     ...(googlemeet ? { googlemeet: googlemeet } : {}),
-    ...(timeslot ? { timeslot: timeslot } : {}),
+    ...(timeSlot ? { timeSlot: timeSlot } : {}),
   };
 };
 
@@ -86,7 +86,8 @@ const updateMentorInfo = async (req, res, tokenData) => {
     } else {
       const updateProfile = await mentorCollection.findOneAndUpdate(
         { mentor_id: tokenData.user_id },
-        { $set: mentorPayload }
+        { $set: mentorPayload },
+        { returnOriginal: false }
       );
       if (!updateProfile.value) {
         statusCode = 401;
@@ -145,31 +146,32 @@ const queryMentors = async () => {
   let collectionObj;
 
   try {
-
     collectionObj = await mongoUtil.fetchCollection(
       process.env.MENTORS_COLLECTION
     );
-    data = await collectionObj.aggregate([
-      {
-        $lookup: {
-          from: `users`,
-          let: { mentor_id: { "$toObjectId": "$mentor_id" } },
-          pipeline: [
-            { $match: { $expr: { $eq: ["$_id", "$$mentor_id"] } } },
-            {
-              $project: {
-                firstName: "$firstName",
-                lastName: "$lastName",
-                email: "$email",
-                title: "$title",
-                _id: 0
+    data = await collectionObj
+      .aggregate([
+        {
+          $lookup: {
+            from: `users`,
+            let: { mentor_id: { $toObjectId: '$mentor_id' } },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$_id', '$$mentor_id'] } } },
+              {
+                $project: {
+                  firstName: '$firstName',
+                  lastName: '$lastName',
+                  email: '$email',
+                  title: '$title',
+                  _id: 0,
+                },
               },
-            },
-          ],
-          as: "userInfo",
-        }
-      },
-    ]).toArray();
+            ],
+            as: 'userInfo',
+          },
+        },
+      ])
+      .toArray();
 
     if (!data.length) {
       statusCode = NOT_FOUND;
