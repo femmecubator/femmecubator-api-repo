@@ -89,7 +89,7 @@ const updatePassword = async (req, res, tokenData) => {
         throw Error('Gateway Timeout');
       } else {
         statusCode = OK;
-        message = 'Password updated successfully';
+        message = 'Success';
         data = {};
       }
     }
