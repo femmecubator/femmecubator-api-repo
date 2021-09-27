@@ -54,6 +54,12 @@ const getMentorTimeSlots = async (req) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
+      logger.error(
+        setLogDetails(
+          'bookingMiddleware.getMentorTimeSlots',
+          'Failed to fetch MentorTimeSlots',
+        )
+      );  
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';

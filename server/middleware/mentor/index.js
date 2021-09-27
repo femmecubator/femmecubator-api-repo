@@ -59,6 +59,13 @@ const saveMentorInfo = async (req, res, tokenData) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
+      logger.error(
+        setLogDetails(
+          'mentorMiddleware.saveMentorInfo',
+          'Failed to save MentorInfo',
+          `email - ${tokenData.email}`
+        )
+      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
@@ -101,6 +108,13 @@ const updateMentorInfo = async (req, res, tokenData) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
+      logger.error(
+        setLogDetails(
+          'mentorMiddleware.updateMentorInfo',
+          'Failed to update MentorInfo',
+          `email - ${tokenData.email}`
+        )
+      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
@@ -131,6 +145,12 @@ const getMentorInfo = async ({ user_id }) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
+      logger.error(
+        setLogDetails(
+          'mentorMiddleware.getMentorInfo',
+          'Failed to Fetch MentorInfo'
+        )
+      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
@@ -183,6 +203,12 @@ const queryMentors = async () => {
     if (error) {
       statusCode = BAD_REQUEST;
       message = error.message;
+      logger.error(
+        setLogDetails(
+          'mentorMiddleware.queryMentors',
+          'Failed to fetch Mentors List'
+        )
+      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';

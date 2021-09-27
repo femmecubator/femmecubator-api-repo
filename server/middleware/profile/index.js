@@ -5,6 +5,7 @@ const { OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
 const bcrypt = require('bcryptjs');
 const generateCookie = require('../../utils/generateCookie');
+const logger = require('simple-node-logger').createSimpleLogger();
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -49,6 +50,13 @@ const updateProfileData = async (req, res, tokenData) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.updateProfileData',
+          'Failed to update user profile Info',
+          `email - ${tokenData.email}`
+        )
+      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
@@ -97,6 +105,13 @@ const updatePassword = async (req, res, tokenData) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.updatePassword',
+          'Failed to update user password',
+          `email - ${req.body.email}`
+        )
+      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
@@ -126,6 +141,13 @@ const getProfileData = async ({ email }) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.getProfileData',
+          'Failed to fetch user Info',
+          `email - ${req.body.email}`
+        )
+      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
