@@ -5,6 +5,8 @@ const loginRoutes = require('../routes/login');
 const registerRoutes = require('../routes/register');
 const mentorRoutes = require('../routes/mentor');
 const directoryRoutes = require('../routes/directory');
+const profileRoutes = require('../routes/profile');
+const bookingRoutes = require('../routes/booking')
 const cookieParser = require('cookie-parser');
 const { CORS_ORIGINS } = require('../utils/constants');
 
@@ -35,5 +37,8 @@ module.exports = () => {
   app.use('/api/register', registerRoutes);
   app.use('/api/mentors', mentorRoutes);
   app.use('/api/directory', directoryRoutes);
+  app.use('/api/profile', profileRoutes);
+  app.use('/api/booking', bookingRoutes);
+
   return app;
 };
