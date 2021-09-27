@@ -64,7 +64,6 @@ const saveMentorInfo = async (req, res, tokenData) => {
       message = 'Gateway timeout';
     }
   }
-  console.log(statusCode, message, data);
   return { statusCode, message, data };
 };
 
