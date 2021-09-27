@@ -6,7 +6,7 @@ const mongoUtil = require('../../utils/mongoUtil');
 const bcrypt = require('bcryptjs');
 const generateCookie = require('../../utils/generateCookie');
 const logger = require('simple-node-logger').createSimpleLogger();
-
+const { setLogDetails } = require('../../utils/constants');
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
   message,

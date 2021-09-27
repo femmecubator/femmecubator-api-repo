@@ -3,7 +3,8 @@ const {
 } = require('../../utils/constants');
 const { OK, BAD_REQUEST, GATEWAY_TIMEOUT } = StatusCodes;
 const mongoUtil = require('../../utils/mongoUtil');
-const generateCookie = require('../../utils/generateCookie');
+const logger = require('simple-node-logger').createSimpleLogger();
+const { setLogDetails } = require('../../utils/constants');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -15,12 +16,15 @@ const availableTimeSlots = async (forDays, savedTimeSlots) => {
   forDays.forEach(day => {
     let date = new Date(day.date).setHours(0, 0, 0, 0);
     let weekDay = day.weekDay;
+    day.time = []
     savedTimeSlots.forEach(timeSlot => {
       let startDay = new Date(timeSlot.startDate).setHours(0, 0, 0, 0);
       let endDate = new Date(timeSlot.endDate).setHours(0, 0, 0, 0);
       let weekDays = timeSlot.weekDays
       if (startDay <= date && endDate >= date && weekDays.includes(weekDay)) {
-        day.time = [timeSlot.startTime, timeSlot.endTime]
+        let startTime = timeSlot.startTime;
+        let endTime = timeSlot.endTime;
+        day.time.push({startTime, endTime})
       }
     });
   });
