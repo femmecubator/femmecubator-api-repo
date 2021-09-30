@@ -14,5 +14,12 @@ router.post(
   authMiddleware.errorHandler,
   bookingMiddleWares.getMentorTimeSlots
 );
+router.post(
+  '/createCalendarEvent',
+  timeout(TIMEOUT, { respond: true }),
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
+  bookingMiddleWares.createCalendarEvent
+);
 
 module.exports = router;
