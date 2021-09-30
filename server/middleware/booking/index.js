@@ -134,57 +134,38 @@ const createCalendarEvent = async (req, res) => {
       statusCode = BAD_REQUEST;
       message = 'Something Went Wrong';
       data = {};
-      // throw Error('Unable to access calendar');
     }
 
-    calendar.freebusy.query(
-      {
-        resource: {
-          timeMin: new Date(eventStartTime),
-          timeMax: new Date(eventEndTime),
-          timeZone: timeZone,
-          items: [{ id: 'primary' }],
-        },
+    const response = await calendar.freebusy.query({
+      resource: {
+        timeMin: new Date(eventStartTime),
+        timeMax: new Date(eventEndTime),
+        timeZone: timeZone,
+        items: [{ id: 'primary' }],
       },
-      (err, res) => {
-        if (err) {
-          console.log('Something Went Wrong');
-          statusCode = BAD_REQUEST;
-          message = 'Something Went Wrong';
-          data = {};
-          // throw Error('Something Went Wrong');
-        }
-        const eventArr = res.data.calendars.primary.busy;
-
-        if (eventArr.length === 0)
-          return calendar.events.insert(
-            {
-              calendarId: 'primary',
-              resource: event,
-              sendUpdates: 'all',
-              conferenceDataVersion: 1,
-            },
-            function (err, event) {
-              if (err) {
-                console.log('Error Creating Calender Event');
-                statusCode = BAD_REQUEST;
-                message = 'Error Creating Calender Event';
-                data = {};
-              }
-              statusCode = OK;
-              message = 'Success';
-              data = {};
-              console.log(event);
-            }
-          );
+    });
+    if (response.status === 200) {
+      const eventResponse = await calendar.events.insert({
+        calendarId: 'primary',
+        resource: event,
+        sendUpdates: 'all',
+        conferenceDataVersion: 1,
+      });
+      console.log(eventResponse);
+      if (eventResponse.status === 200) {
+        statusCode = OK;
+        message = 'Success';
+        data = {};
+      } else {
         statusCode = BAD_REQUEST;
-        console.log('Something Went Wrong');
-        // throw Error('Mentor is busy');
-        statusCode = BAD_REQUEST;
-        message = 'Error Creating Calender Even';
+        message = 'Error Creating Calender Event';
         data = {};
       }
-    );
+    } else {
+      statusCode = BAD_REQUEST;
+      message = 'Error Creating Calender Event';
+      data = {};
+    }
   } catch (err) {
     if (err) {
       console.log(err);
@@ -196,17 +177,8 @@ const createCalendarEvent = async (req, res) => {
       console.log(err);
     }
   }
-  console.log('====1 check ======');
-  console.log(statusCode);
-  console.log('====2 check ======');
-  console.log(message);
-  console.log('====3 check ======');
-  console.log(data);
-  return;
-
   return resObj(statusCode, message, data);
 };
-
 const bookingMiddleware = {
   getMentorTimeSlots: async (req, res) => {
     const { statusCode, ...rest } = await getMentorTimeSlots(req);
@@ -214,9 +186,6 @@ const bookingMiddleware = {
   },
   createCalendarEvent: async (req, res) => {
     const { statusCode, ...rest } = await createCalendarEvent(req, res);
-    console.log('============');
-    console.log(statusCode);
-    console.log(...rest);
     res.status(statusCode).send(rest);
   },
 };
