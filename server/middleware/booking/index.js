@@ -87,15 +87,17 @@ const getMentorTimeSlots = async (req) => {
   }
   return resObj(statusCode, message, data);
 };
-const saveBookings = async (data, mentor_id,mentorName,menteeName) => {
+const saveBookings = async (data, mentor_id,mentorName,menteeName,eventStartTime, eventEndTime) => {
   const { organizer, start, end, attendees, hangoutLink } = data;
   const payload = {
     organizer : organizer.email,
     organizerName : menteeName,
-    start,
-    end,
+    organizerStart:start.dateTime,
+    organizerEnd:end.dateTime,
     attendee : attendees[0].email,
     attendeeName : mentorName,
+    attendeeStart:eventStartTime,
+    attendeeEnd:eventEndTime,
     hangoutLink,
     mentor_id
   };
@@ -117,6 +119,9 @@ const createCalendarEvent = async (req, {userName,user_id}) => {
     access_token,
     timeZone,
   } = req.body;
+  console.log(userName);
+  console.log(mentorName)
+
   const event = {
     summary: `Booking with ${mentorName}`,
     colorId: 1,
@@ -171,7 +176,7 @@ const createCalendarEvent = async (req, {userName,user_id}) => {
         conferenceDataVersion: 1,
       });
       if (eventResponse.status === 200) {
-        await saveBookings(eventResponse.data,user_id,mentorName,userName);
+        await saveBookings(eventResponse.data,user_id,mentorName,userName, eventStartTime, eventEndTime);
         statusCode = OK;
         message = 'Success';
         data = {};
