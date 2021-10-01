@@ -7,6 +7,13 @@ const authMiddleware = require('../../middleware/auth');
 
 router.use(express.json());
 
+router.get(
+  '/',
+  timeout(TIMEOUT, { respond: true }),
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
+  bookingMiddleWares.getMentorsBookings
+);
 router.post(
   '/getTimeSlots',
   timeout(TIMEOUT, { respond: true }),

@@ -87,8 +87,23 @@ const getMentorTimeSlots = async (req) => {
   }
   return resObj(statusCode, message, data);
 };
-
-const createCalendarEvent = async (req, res) => {
+const saveBookings = async (data, mentor_id) => {
+  const { organizer, start, end, attendees, hangoutLink } = data;
+  const payload = {
+    organizer,
+    start,
+    end,
+    attendees,
+    hangoutLink,
+    mentor_id
+  };
+  const { BOOKINGS_COLLECTION } = process.env;
+  const bookingCollection = await mongoUtil.fetchCollection(
+    BOOKINGS_COLLECTION
+  );
+  await bookingCollection.insertOne(payload);
+};
+const createCalendarEvent = async (req, {user_id}) => {
   var data;
   var statusCode;
   var message;
@@ -145,14 +160,16 @@ const createCalendarEvent = async (req, res) => {
       },
     });
     if (response.status === 200) {
+      const eventArray = response.data.calendars.primary.busy;
+      if(eventArray.length !== 0) throw('Mentor is unavailable')
       const eventResponse = await calendar.events.insert({
         calendarId: 'primary',
         resource: event,
         sendUpdates: 'all',
         conferenceDataVersion: 1,
       });
-      console.log(eventResponse);
       if (eventResponse.status === 200) {
+        await saveBookings(eventResponse.data,user_id);
         statusCode = OK;
         message = 'Success';
         data = {};
@@ -179,15 +196,51 @@ const createCalendarEvent = async (req, res) => {
   }
   return resObj(statusCode, message, data);
 };
+const getBookingInfo = async ( {user_id} ) => {
+  let data;
+  let statusCode;
+  let message;
+  try {
+    const { BOOKINGS_COLLECTION } = process.env;
+    const bookingCollection = await mongoUtil.fetchCollection(
+      BOOKINGS_COLLECTION
+    );
+    const bookingData = await bookingCollection.find({
+      mentor_id: user_id,
+    }).toArray();
+    console.log(bookingData);
+    if (!bookingData) {
+      statusCode = 401;
+      throw Error('User does not exist!');
+    }
+    statusCode = OK;
+    message = 'Success';
+    data = bookingData;
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
 const bookingMiddleware = {
   getMentorTimeSlots: async (req, res) => {
     const { statusCode, ...rest } = await getMentorTimeSlots(req);
     res.status(statusCode).send(rest);
   },
   createCalendarEvent: async (req, res) => {
-    const { statusCode, ...rest } = await createCalendarEvent(req, res);
+    var tokenData = res.locals.user;
+    const { statusCode, ...rest } = await createCalendarEvent(req,tokenData);
     res.status(statusCode).send(rest);
   },
+  getMentorsBookings: async (req, res) => {
+    const { statusCode, ...rest } = await getBookingInfo(res.locals.user);
+    res.status(statusCode).send(rest);
+  }
 };
 
 module.exports = bookingMiddleware;
