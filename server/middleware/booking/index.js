@@ -87,13 +87,15 @@ const getMentorTimeSlots = async (req) => {
   }
   return resObj(statusCode, message, data);
 };
-const saveBookings = async (data, mentor_id) => {
+const saveBookings = async (data, mentor_id,mentorName,menteeName) => {
   const { organizer, start, end, attendees, hangoutLink } = data;
   const payload = {
     organizer : organizer.email,
+    organizerName : menteeName,
     start,
     end,
     attendee : attendees[0].email,
+    attendeeName : mentorName,
     hangoutLink,
     mentor_id
   };
@@ -103,7 +105,7 @@ const saveBookings = async (data, mentor_id) => {
   );
   await bookingCollection.insertOne(payload);
 };
-const createCalendarEvent = async (req, {user_id}) => {
+const createCalendarEvent = async (req, {userName,user_id}) => {
   var data;
   var statusCode;
   var message;
@@ -169,7 +171,7 @@ const createCalendarEvent = async (req, {user_id}) => {
         conferenceDataVersion: 1,
       });
       if (eventResponse.status === 200) {
-        await saveBookings(eventResponse.data,user_id);
+        await saveBookings(eventResponse.data,user_id,mentorName,userName);
         statusCode = OK;
         message = 'Success';
         data = {};
