@@ -90,10 +90,10 @@ const getMentorTimeSlots = async (req) => {
 const saveBookings = async (data, mentor_id) => {
   const { organizer, start, end, attendees, hangoutLink } = data;
   const payload = {
-    organizer,
+    organizer : organizer.email,
     start,
     end,
-    attendees,
+    attendee : attendees[0].email,
     hangoutLink,
     mentor_id
   };
@@ -196,7 +196,7 @@ const createCalendarEvent = async (req, {user_id}) => {
   }
   return resObj(statusCode, message, data);
 };
-const getBookingInfo = async ( {user_id} ) => {
+const getBookingInfo = async ( {email} ) => {
   let data;
   let statusCode;
   let message;
@@ -206,8 +206,14 @@ const getBookingInfo = async ( {user_id} ) => {
       BOOKINGS_COLLECTION
     );
     const bookingData = await bookingCollection.find({
-      mentor_id: user_id,
-    }).toArray();
+      $or:[
+        {
+          organizer: email,
+        },
+        {
+          attendee: email,
+        }
+      ]}).toArray();
     console.log(bookingData);
     if (!bookingData) {
       statusCode = 401;
