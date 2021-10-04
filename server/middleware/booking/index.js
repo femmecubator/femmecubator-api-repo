@@ -87,19 +87,26 @@ const getMentorTimeSlots = async (req) => {
   }
   return resObj(statusCode, message, data);
 };
-const saveBookings = async (data, mentor_id,mentorName,menteeName,eventStartTime, eventEndTime) => {
+const saveBookings = async (
+  data,
+  mentor_id,
+  mentorName,
+  menteeName,
+  eventStartTime,
+  eventEndTime
+) => {
   const { organizer, start, end, attendees, hangoutLink } = data;
   const payload = {
-    organizer : organizer.email,
-    organizerName : menteeName,
-    organizerStart:start.dateTime,
-    organizerEnd:end.dateTime,
-    attendee : attendees[0].email,
-    attendeeName : mentorName,
-    attendeeStart:eventStartTime,
-    attendeeEnd:eventEndTime,
+    organizer: organizer.email,
+    organizerName: menteeName,
+    organizerStart: start.dateTime,
+    organizerEnd: end.dateTime,
+    attendee: attendees[0].email,
+    attendeeName: mentorName,
+    attendeeStart: eventStartTime,
+    attendeeEnd: eventEndTime,
     hangoutLink,
-    mentor_id
+    mentor_id,
   };
   const { BOOKINGS_COLLECTION } = process.env;
   const bookingCollection = await mongoUtil.fetchCollection(
@@ -107,7 +114,7 @@ const saveBookings = async (data, mentor_id,mentorName,menteeName,eventStartTime
   );
   await bookingCollection.insertOne(payload);
 };
-const createCalendarEvent = async (req, {userName,user_id}) => {
+const createCalendarEvent = async (req, { userName, user_id }) => {
   var data;
   var statusCode;
   var message;
@@ -119,8 +126,6 @@ const createCalendarEvent = async (req, {userName,user_id}) => {
     access_token,
     timeZone,
   } = req.body;
-  console.log(userName);
-  console.log(mentorName)
 
   const event = {
     summary: `Booking with ${mentorName}`,
@@ -152,7 +157,6 @@ const createCalendarEvent = async (req, {userName,user_id}) => {
     });
 
     if (!calendar) {
-      console.log('Unable to access calendar');
       statusCode = BAD_REQUEST;
       message = 'Something Went Wrong';
       data = {};
@@ -168,7 +172,7 @@ const createCalendarEvent = async (req, {userName,user_id}) => {
     });
     if (response.status === 200) {
       const eventArray = response.data.calendars.primary.busy;
-      if(eventArray.length !== 0) throw('Mentor is unavailable')
+      if (eventArray.length !== 0) throw 'Mentor is unavailable';
       const eventResponse = await calendar.events.insert({
         calendarId: 'primary',
         resource: event,
@@ -176,7 +180,14 @@ const createCalendarEvent = async (req, {userName,user_id}) => {
         conferenceDataVersion: 1,
       });
       if (eventResponse.status === 200) {
-        await saveBookings(eventResponse.data,user_id,mentorName,userName, eventStartTime, eventEndTime);
+        await saveBookings(
+          eventResponse.data,
+          user_id,
+          mentorName,
+          userName,
+          eventStartTime,
+          eventEndTime
+        );
         statusCode = OK;
         message = 'Success';
         data = {};
@@ -192,18 +203,16 @@ const createCalendarEvent = async (req, {userName,user_id}) => {
     }
   } catch (err) {
     if (err) {
-      console.log(err);
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
-      console.log(err);
     }
   }
   return resObj(statusCode, message, data);
 };
-const getBookingInfo = async ( {email} ) => {
+const getBookingInfo = async ({ email }) => {
   let data;
   let statusCode;
   let message;
@@ -212,16 +221,18 @@ const getBookingInfo = async ( {email} ) => {
     const bookingCollection = await mongoUtil.fetchCollection(
       BOOKINGS_COLLECTION
     );
-    const bookingData = await bookingCollection.find({
-      $or:[
-        {
-          organizer: email,
-        },
-        {
-          attendee: email,
-        }
-      ]}).toArray();
-    console.log(bookingData);
+    const bookingData = await bookingCollection
+      .find({
+        $or: [
+          {
+            organizer: email,
+          },
+          {
+            attendee: email,
+          },
+        ],
+      })
+      .toArray();
     if (!bookingData) {
       statusCode = 401;
       throw Error('User does not exist!');
@@ -247,13 +258,13 @@ const bookingMiddleware = {
   },
   createCalendarEvent: async (req, res) => {
     var tokenData = res.locals.user;
-    const { statusCode, ...rest } = await createCalendarEvent(req,tokenData);
+    const { statusCode, ...rest } = await createCalendarEvent(req, tokenData);
     res.status(statusCode).send(rest);
   },
   getMentorsBookings: async (req, res) => {
     const { statusCode, ...rest } = await getBookingInfo(res.locals.user);
     res.status(statusCode).send(rest);
-  }
+  },
 };
 
 module.exports = bookingMiddleware;
