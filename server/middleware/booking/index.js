@@ -26,10 +26,10 @@ const availableTimeSlots = async (forDays, savedTimeSlots) => {
     let weekDay = day.weekDay;
     day.time = [];
     savedTimeSlots.forEach((timeSlot) => {
-      let startDay = new Date(timeSlot.startDate).setHours(0, 0, 0, 0);
-      let endDate = new Date(timeSlot.endDate).setHours(0, 0, 0, 0);
-      let weekDays = timeSlot.weekDays;
-      let showDate = new Date(date);
+      const startDay = new Date(timeSlot.startDate).setHours(0, 0, 0, 0);
+      const endDate = new Date(timeSlot.endDate).setHours(0, 0, 0, 0);
+      const weekDays = timeSlot.weekDays;
+      const showDate = new Date(date);
       if (startDay <= date && endDate >= date && weekDays.includes(weekDay)) {
         let startTime = new Date(timeSlot.startTime);
         let endTime = new Date(timeSlot.endTime);
