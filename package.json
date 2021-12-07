@@ -55,6 +55,7 @@
     "bcryptjs": "^2.4.3",
     "connect-timeout": "^1.9.0",
     "cookie-parser": "^1.4.5",
+    "crypto-random-string": "^4.0.0",
     "cryptr": "^6.0.2",
     "express": "^4.17.1",
     "googleapis": "^87.0.0",
