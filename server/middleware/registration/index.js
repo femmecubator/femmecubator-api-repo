@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const cryptoRandomString = require("crypto-random-string");
+const cryptoRandomString = require('random-base64-string');
 const {
   HttpStatusCodes: { StatusCodes },
 } = require('../../utils/constants');
@@ -24,7 +24,7 @@ const isFormValid = ({ body }) => {
     'title',
     'email',
     'password',
-    'token'
+    //'token'
   ];
 
   for (let i = 0; i < formFields.length; i++) {
@@ -57,7 +57,7 @@ const hashForm = ({ body }) => {
     role_id: parseInt(role_id),
     lastName,
     firstName,
-    token: cryptoRandomString({ length: 25, type: "base64" }),
+    //token: cryptoRandomString({ length: 25, type: "base64" }),
     hasOnboarded: false,
   };
   return userPayload;
