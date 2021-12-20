@@ -71,13 +71,14 @@ const skillsUpdateService = async (req, res) => {
   let message;
   let collectionObj;
   try {
-    const {skill} = req.body;
+    const {skills} = req.body;
     collectionObj = await mongoUtil.fetchCollection(
       process.env.SKILLS_LIST_COLLECTION
     );
-    data = await collectionObj.findOne({role_id:0})
-    data.skills.push(skill);
-
+    data = await collectionObj.findOne({role_id:0});
+    skills.forEach(skill => {
+      data.skills.push(skill)
+    });
     const updatedSkillList = await collectionObj.findOneAndUpdate(
       { role_id: 0 },
       { $set: {skills :data.skills} },
