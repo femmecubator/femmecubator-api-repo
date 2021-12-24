@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const generateCookie = require('../../utils/generateCookie');
 const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails } = require('../../utils/constants');
+
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
   message,
@@ -55,56 +56,6 @@ const updateProfileData = async (req, res, tokenData) => {
           'profileMiddleware.updateProfileData',
           'Failed to update user profile Info',
           `email - ${tokenData.email}`
-        )
-      );
-    } else {
-      statusCode = GATEWAY_TIMEOUT;
-      message = 'Gateway timeout';
-    }
-  }
-  return resObj(statusCode, message, data);
-};
-
-const resetPassword = async (req, res, tokenData) => {
-  let data;
-  let statusCode;
-  let message;
-  const saltRounds = 10;
-  const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
-  try {
-    const { token, newPassword } = req.body;
-    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
-    const matched = userCollection.findOne({
-      $and: [{ email: tokenData.email }, { token: token }],
-    });
-    if (!matched) {
-      statusCode = 401;
-      throw Error('User does not exist!');
-    }
-
-    const hashedPassword = await bcrypt.hashSync(newPassword, saltRounds);
-    if (hashedPassword) {
-      const resetPassword = await userCollection.findOneAndUpdate(
-        { email: tokenData.email },
-        { $set: { password: hashedPassword } }
-      );
-      if (!resetPassword || TEST_TIMEOUT) {
-        throw Error('Gateway Timeout');
-      } else {
-        statusCode = OK;
-        message = 'Success';
-        data = {};
-      }
-    }
-  } catch (err) {
-    if (err) {
-      statusCode = statusCode || BAD_REQUEST;
-      message = err.message;
-      logger.error(
-        setLogDetails(
-          'profileMiddleware.resetPassword',
-          'Failed to reset user password',
-          `email - ${req.body.email}`
         )
       );
     } else {
@@ -224,7 +175,7 @@ const profileMiddleware = {
     var tokenData = res.locals.user;
     const { statusCode, ...rest } = await getProfileData(tokenData);
     res.status(statusCode).send(rest);
-  },
+  }
 };
 
 module.exports = profileMiddleware;

@@ -9,6 +9,7 @@ const JWT = require('jsonwebtoken');
 const { v4 } = require('uuid');
 const registrationLogger = require('./registrationLogger');
 const generateCookie = require('../../utils/generateCookie');
+const nodemailer = require('nodemailer');
 
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
@@ -24,7 +25,7 @@ const isFormValid = ({ body }) => {
     'title',
     'email',
     'password',
-    //'token'
+    'token',
   ];
 
   for (let i = 0; i < formFields.length; i++) {
@@ -57,7 +58,7 @@ const hashForm = ({ body }) => {
     role_id: parseInt(role_id),
     lastName,
     firstName,
-    //token: cryptoRandomString({ length: 25, type: "base64" }),
+    token: cryptoRandomString(25),
     hasOnboarded: false,
   };
   return userPayload;
@@ -72,9 +73,10 @@ const createNewUser = async (req, res) => {
 
   try {
     const userPayload = hashForm(req);
+    console.log(userPayload);
     email = req.body.email;
 
-    if (!isFormValid(req)) throw Error('Bad request');
+    //  if (!isFormValid(req)) throw Error('Bad request');
 
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne(
@@ -113,10 +115,128 @@ const createNewUser = async (req, res) => {
   }
   return resObj(statusCode, message, data);
 };
+const sendEmail = async (req, res) => {
+  let data;
+  let statusCode;
+  let message;
+  const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
+  const { email } = req.body;
+  try {
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const user = await userCollection.findOne({ email });
+    const token = user.token;
+    var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: '',
+        pass: '',
+      },
+    });
 
+    var mailOptions = {
+      from: 'femmecubator <prbisht3@gmail.com>',
+      to: 'preeti.bisht@catalyst.sh',
+      subject: 'Reset your account password',
+      html:
+        "Dear User,<br/>  To reset your password, please click or copy the link below. <br/> <a href='http://local.femmecubator.com:3000/resetPassword/?token=" +
+        token +
+        '&email=' +
+        email +
+        "'>http://local.femmecubator.com:3000/resetPassword/?token=" +
+        token +
+        '&email=' +
+        email +
+        '</a> <br /> Best Regards, <br /> Femmecubator Team <br /><br /> ',
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+    statusCode = OK;
+    message = 'Success';
+    data = {};
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.resetPassword',
+          'Failed to reset user password'
+        )
+      );
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
+
+const resetPassword = async (req, res) => {
+  let data;
+  let statusCode;
+  let message;
+  const saltRounds = 10;
+  const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
+  try {
+    const { token, email, newPassword } = req.body;
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const matched = userCollection.findOne({
+      $and: [{ email: email }, { token: token }],
+    });
+    if (!matched) {
+      statusCode = 401;
+      throw Error('User does not exist!');
+    }
+
+    const hashedPassword = bcrypt.hashSync(newPassword, saltRounds);
+    if (hashedPassword) {
+      const resetPassword = await userCollection.findOneAndUpdate(
+        { email: email },
+        { $set: { password: hashedPassword } }
+      );
+      if (!resetPassword || TEST_TIMEOUT) {
+        throw Error('Gateway Timeout');
+      } else {
+        statusCode = OK;
+        message = 'Success';
+        data = {};
+      }
+    }
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.resetPassword',
+          'Failed to reset user password',
+          `email - ${email}`
+        )
+      );
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
 const registrationMiddleware = {
   register: async (req, res) => {
     const { statusCode, ...rest } = await createNewUser(req, res);
+    res.status(statusCode).send(rest);
+  },
+  forgotPassword: async (req, res) => {
+    const { statusCode, ...rest } = await sendEmail(req, res);
+    res.status(statusCode).send(rest);
+  },
+  resetPassword: async (req, res) => {
+    const { statusCode, ...rest } = await resetPassword(req, res);
     res.status(statusCode).send(rest);
   },
 };
