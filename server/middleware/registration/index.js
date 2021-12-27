@@ -73,11 +73,8 @@ const createNewUser = async (req, res) => {
 
   try {
     const userPayload = hashForm(req);
-    console.log(userPayload);
     email = req.body.email;
-
     //  if (!isFormValid(req)) throw Error('Bad request');
-
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const userFound = await userCollection.findOne(
       { email: email },
@@ -163,12 +160,6 @@ const sendEmail = async (req, res) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
-      logger.error(
-        setLogDetails(
-          'profileMiddleware.resetPassword',
-          'Failed to reset user password'
-        )
-      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
@@ -212,13 +203,6 @@ const resetPassword = async (req, res) => {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
       message = err.message;
-      logger.error(
-        setLogDetails(
-          'profileMiddleware.resetPassword',
-          'Failed to reset user password',
-          `email - ${email}`
-        )
-      );
     } else {
       statusCode = GATEWAY_TIMEOUT;
       message = 'Gateway timeout';
