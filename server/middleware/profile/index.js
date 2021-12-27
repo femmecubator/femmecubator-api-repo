@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const generateCookie = require('../../utils/generateCookie');
 const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails } = require('../../utils/constants');
+
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
   message,
@@ -174,7 +175,7 @@ const profileMiddleware = {
     var tokenData = res.locals.user;
     const { statusCode, ...rest } = await getProfileData(tokenData);
     res.status(statusCode).send(rest);
-  },
+  }
 };
 
 module.exports = profileMiddleware;

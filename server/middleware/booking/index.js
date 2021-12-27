@@ -125,10 +125,11 @@ const createCalendarEvent = async (req, { userName, user_id }) => {
     mentorEmailId,
     access_token,
     timeZone,
+    summary
   } = req.body;
 
   const event = {
-    summary: `Booking with ${mentorName}`,
+    summary: summary,
     colorId: 1,
     start: {
       dateTime: new Date(eventStartTime),
