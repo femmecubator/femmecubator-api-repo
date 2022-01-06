@@ -93,7 +93,8 @@ const saveBookings = async (
   mentorName,
   menteeName,
   eventStartTime,
-  eventEndTime
+  eventEndTime,
+  summary
 ) => {
   const { organizer, start, end, attendees, hangoutLink } = data;
   const payload = {
@@ -107,6 +108,7 @@ const saveBookings = async (
     attendeeEnd: eventEndTime,
     hangoutLink,
     mentor_id,
+    summary
   };
   const { BOOKINGS_COLLECTION } = process.env;
   const bookingCollection = await mongoUtil.fetchCollection(
@@ -187,7 +189,9 @@ const createCalendarEvent = async (req, { userName, user_id }) => {
           mentorName,
           userName,
           eventStartTime,
-          eventEndTime
+          eventEndTime,
+          summary
+
         );
         statusCode = OK;
         message = 'Success';
