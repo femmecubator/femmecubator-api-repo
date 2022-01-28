@@ -14,11 +14,11 @@ const authMiddleware = {
     const token = req.cookies.TOKEN;
     if (token) {
       try {
-        const { email, userName, role_id, title } = JWT.verify(
+        const { email, userName, role_id, title, user_id } = JWT.verify(
           token,
           process.env.SECRET_KEY
         );
-        res.locals.user = { email, userName, role_id, title };
+        res.locals.user = { email, userName, role_id, title, user_id };
         logger.info(
           setLogDetails(
             'authMiddleware.validateCookie',

@@ -14,7 +14,6 @@ const resObj = (statusCode, message, data = {}) => ({
   data,
 });
 
-
 const loginUser = async (req, res) => {
   const { USERS_COLLECTION, TEST_TIMEOUT } = process.env;
   let data;
@@ -32,7 +31,9 @@ const loginUser = async (req, res) => {
     sentPassword = req.body.password;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
 
-    const userFound = await userCollection.findOne({ email }, {projection: {_id: 0}});
+    const userFound = await userCollection.findOne(
+      { email }
+    );
 
     if (!userFound) {
       statusCode = 401;
@@ -76,7 +77,6 @@ const loginUser = async (req, res) => {
 };
 
 const loginMiddleware = {
-
   login: async (req, res) => {
     const { statusCode, ...rest } = await loginUser(req, res);
     res.status(statusCode).send(rest);

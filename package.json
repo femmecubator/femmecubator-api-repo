@@ -57,9 +57,12 @@
     "cookie-parser": "^1.4.5",
     "cryptr": "^6.0.2",
     "express": "^4.17.1",
+    "googleapis": "^87.0.0",
     "http-status-codes": "^2.1.4",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.2",
+    "nodemailer": "^6.7.2",
+    "random-base64-string": "^1.0.0",
     "simple-node-logger": "^18.12.24",
     "uuidv4": "^6.2.5"
   },
