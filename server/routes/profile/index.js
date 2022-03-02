@@ -15,6 +15,22 @@ router.post(
   profileMiddleWares.updateProfile
 );
 router.post(
+  '/deleteUser',
+  timeout(TIMEOUT, { respond: true }),
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
+  authMiddleware.adminAuth,
+  profileMiddleWares.deleteUserData
+);
+router.get(
+  '/getUserRoles',
+  timeout(TIMEOUT, { respond: true }),
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
+  authMiddleware.adminAuth,
+  profileMiddleWares.getUserRoles
+);
+router.post(
   '/updatePassword',
   timeout(TIMEOUT, { respond: true }),
   authMiddleware.validateCookie,
@@ -27,6 +43,15 @@ router.get(
   authMiddleware.validateCookie,
   authMiddleware.errorHandler,
   profileMiddleWares.getProfileData
+);
+
+router.get(
+  '/getAllUsers',
+  timeout(TIMEOUT, { respond: true }),
+  authMiddleware.validateCookie,
+  authMiddleware.errorHandler,
+  authMiddleware.adminAuth,
+  profileMiddleWares.getAllUsers
 );
 
 module.exports = router;
