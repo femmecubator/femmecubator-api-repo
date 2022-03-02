@@ -181,11 +181,13 @@ const getAllUsers = async (req) => {
     }
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const allUsersData = await userCollection
-      .find({ role_id: { $in: req.body.filterArray } })
+      .find(
+        {
+          role_id: { $in: req.body.filterArray },
+        },
+        { projection: { password: 0, token: 0, hasOnboarded: 0, role_id: 0 } }
+      )
       .toArray();
-
-    allUsersData.password = undefined;
-    allUsersData.token = undefined;
     if (!allUsersData || !allUsersData.length > 0) {
       statusCode = 401;
       throw Error('Users does not exist!');
