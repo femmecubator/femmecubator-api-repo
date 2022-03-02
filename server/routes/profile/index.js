@@ -45,7 +45,7 @@ router.get(
   profileMiddleWares.getProfileData
 );
 
-router.get(
+router.post(
   '/getAllUsers',
   timeout(TIMEOUT, { respond: true }),
   authMiddleware.validateCookie,
