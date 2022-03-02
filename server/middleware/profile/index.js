@@ -188,13 +188,19 @@ const getAllUsers = async (req) => {
         { projection: { password: 0, token: 0, hasOnboarded: 0, role_id: 0 } }
       )
       .toArray();
+    const usersCount = await userCollection
+      .aggregate([{ $group: { _id: '$role_id', count: { $sum: 1 } } }])
+      .toArray();
     if (!allUsersData || !allUsersData.length > 0) {
       statusCode = 401;
       throw Error('Users does not exist!');
     }
     statusCode = OK;
     message = 'Success';
-    data = allUsersData;
+    data = {
+      usersData: allUsersData,
+      usersCount: usersCount ? usersCount : null,
+    };
   } catch (err) {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
