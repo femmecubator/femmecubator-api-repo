@@ -176,13 +176,12 @@ const getAllUsers = async (req) => {
   const { USERS_COLLECTION } = process.env;
   try {
     if (!req.body.filterArray || !req.body.filterArray.length > 0) {
-      console.log('tetsing');
       statusCode = 401;
       throw Error('Something went wrong');
     }
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const allUsersData = await userCollection
-      .find({ role_id: { $all: req.body.filterArray } })
+      .find({ role_id: { $in: req.body.filterArray } })
       .toArray();
 
     allUsersData.password = undefined;
