@@ -46,7 +46,7 @@ const authMiddleware = {
     }
     next();
   },
-  adminAuth: (req, next) => {
+  adminAuth: (req, res, next) => {
     const token = req.cookies.TOKEN;
     const { role_id } = JWT.verify(token, process.env.SECRET_KEY);
     if (role_id !== 4) {

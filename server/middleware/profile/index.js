@@ -176,7 +176,7 @@ const getAllUsers = async (req) => {
   const { USERS_COLLECTION } = process.env;
   try {
     if (!req.body.filterArray || !req.body.filterArray.length > 0) {
-      statusCode = 401;
+      statusCode = 500;
       throw Error('Something went wrong');
     }
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
