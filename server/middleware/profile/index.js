@@ -41,12 +41,12 @@ const updateProfileData = async (req, res, tokenData) => {
     const userPayload = createPayload(req.body);
     var userId = null;
     if (req.body._id) {
-      userId = _id;
+      userId = req.body._id;
     }
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const updateProfile = await userCollection.findOneAndUpdate(
-      userId ? { _id: ObjectId(user_id) } : { email: tokenData.email },
+      userId ? { _id: ObjectId(userId) } : { email: tokenData.email },
       { $set: userPayload },
       { returnOriginal: false }
     );
@@ -55,7 +55,7 @@ const updateProfileData = async (req, res, tokenData) => {
       throw Error('User does not exist!');
     }
     const { password, ...rest } = updateProfile.value;
-    generateCookie(res, rest);
+    userId ? null : generateCookie(res, rest);
     statusCode = OK;
     message = 'Success';
     data = rest;
