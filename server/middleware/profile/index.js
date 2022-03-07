@@ -224,19 +224,28 @@ const deleteUserData = async (req) => {
   let data = {};
   let statusCode;
   let message;
+  const { USERS_COLLECTION } = process.env;
   try {
-    var userId = req.body._id;
-    const { USERS_COLLECTION } = process.env;
+    var userId = req.params.userId;
+    console.log(userId);
+    if (!userId) {
+      statusCode = 401;
+      throw Error('Something went wrong');
+    }
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const deleteUser = await userCollection.deleteOne({
       _id: ObjectId(userId),
     });
-    if (!deleteUser) {
+    if (deleteUser.deletedCount) {
+      statusCode = OK;
+      message = 'Success';
+      data = {
+        message: 'User Deleted Successfully',
+      };
+    } else {
       statusCode = 401;
       throw Error('Something went wrong');
     }
-    statusCode = OK;
-    message = 'Success';
   } catch (err) {
     if (err) {
       statusCode = statusCode || BAD_REQUEST;
