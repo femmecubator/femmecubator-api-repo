@@ -334,7 +334,7 @@ const profileMiddleware = {
   },
   deleteUserData: async (req, res) => {
     const { statusCode, ...rest } = await deleteUserData(req, res);
-    res.status(statusCode).send(res);
+    res.status(statusCode).send(rest);
   },
   getUserRoles: async (req, res) => {
     const { statusCode, ...rest } = await getUserRoles(req, res);

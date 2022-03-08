@@ -15,7 +15,7 @@ router.post(
   profileMiddleWares.updateProfile
 );
 router.delete(
-  '/deleteUser',
+  '/deleteUser/:userId',
   timeout(TIMEOUT, { respond: true }),
   authMiddleware.validateCookie,
   authMiddleware.errorHandler,
