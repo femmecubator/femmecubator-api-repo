@@ -8,6 +8,14 @@ const generateCookie = require('../../utils/generateCookie');
 const logger = require('simple-node-logger').createSimpleLogger();
 const { setLogDetails } = require('../../utils/constants');
 
+var ObjectId = require('mongodb').ObjectID;
+
+const rolesData = {
+  mentor: 0,
+  mentee: 1,
+  admin: 4,
+};
+
 const resObj = (statusCode, message, data = {}) => ({
   statusCode,
   message,
@@ -31,10 +39,14 @@ const updateProfileData = async (req, res, tokenData) => {
   let message;
   try {
     const userPayload = createPayload(req.body);
+    var userId = null;
+    if (req.body._id) {
+      userId = req.body._id;
+    }
     const { USERS_COLLECTION } = process.env;
     const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
     const updateProfile = await userCollection.findOneAndUpdate(
-      { email: tokenData.email },
+      userId ? { _id: ObjectId(userId) } : { email: tokenData.email },
       { $set: userPayload },
       { returnOriginal: false }
     );
@@ -43,7 +55,7 @@ const updateProfileData = async (req, res, tokenData) => {
       throw Error('User does not exist!');
     }
     const { password, ...rest } = updateProfile.value;
-    generateCookie(res, rest);
+    userId ? null : generateCookie(res, rest);
     statusCode = OK;
     message = 'Success';
     data = rest;
@@ -156,6 +168,146 @@ const getProfileData = async ({ email }) => {
   }
   return resObj(statusCode, message, data);
 };
+
+const getAllUsers = async (req) => {
+  let data;
+  let statusCode;
+  let message;
+  const { USERS_COLLECTION } = process.env;
+  try {
+    if (!req.body.filterArray || !req.body.filterArray.length > 0) {
+      statusCode = 500;
+      throw Error('Something went wrong');
+    }
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const allUsersData = await userCollection
+      .find(
+        {
+          role_id: { $in: req.body.filterArray },
+        },
+        { projection: { password: 0, token: 0, hasOnboarded: 0, role_id: 0 } }
+      )
+      .toArray();
+    const usersCount = await userCollection
+      .aggregate([{ $group: { _id: '$role_id', count: { $sum: 1 } } }])
+      .toArray();
+    if (!allUsersData || !allUsersData.length > 0) {
+      statusCode = 401;
+      throw Error('Users does not exist!');
+    }
+    statusCode = OK;
+    message = 'Success';
+    data = {
+      usersData: allUsersData,
+      usersCount: usersCount ? usersCount : null,
+    };
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.getUsersInfo',
+          'Unable to fetch users data',
+          `Unable to fetch users data`
+        )
+      );
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
+
+const deleteUserData = async (req) => {
+  let data = {};
+  let statusCode;
+  let message;
+  const { USERS_COLLECTION } = process.env;
+  try {
+    var userId = req.params.userId;
+    console.log(userId);
+    if (!userId) {
+      statusCode = 401;
+      throw Error('Something went wrong');
+    }
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const deleteUser = await userCollection.deleteOne({
+      _id: ObjectId(userId),
+    });
+    if (deleteUser.deletedCount) {
+      statusCode = OK;
+      message = 'Success';
+      data = {
+        message: 'User Deleted Successfully',
+      };
+    } else {
+      statusCode = 401;
+      throw Error('Something went wrong');
+    }
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.deleteUserData',
+          'Failed to delete',
+          `Failed to delete user with user id : ${userId}`
+        )
+      );
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
+
+const getUserRoles = async (req) => {
+  let data;
+  let statusCode;
+  let message;
+  try {
+    const { USERS_COLLECTION } = process.env;
+    const userCollection = await mongoUtil.fetchCollection(USERS_COLLECTION);
+    const userRoles = await userCollection.distinct('role_id');
+    if (!userRoles || !userRoles.length > 0) {
+      statusCode = 401;
+      throw Error('User does not exist!');
+    }
+    var rolesInfo = {};
+    statusCode = OK;
+    message = 'Success';
+    userRoles.map((data) => {
+      if (data === rolesData.mentee) {
+        rolesInfo.mentee = data;
+      } else if (data === rolesData.mentor) {
+        rolesInfo.mentor = data;
+      } else if (data === rolesData.admin) {
+        rolesInfo.admin = data;
+      }
+    });
+    data = rolesInfo;
+  } catch (err) {
+    if (err) {
+      statusCode = statusCode || BAD_REQUEST;
+      message = err.message;
+      logger.error(
+        setLogDetails(
+          'profileMiddleware.getUserRoles',
+          'Failed to get usersRoles',
+          `Failed to get usersRoles`
+        )
+      );
+    } else {
+      statusCode = GATEWAY_TIMEOUT;
+      message = 'Gateway timeout';
+    }
+  }
+  return resObj(statusCode, message, data);
+};
 const profileMiddleware = {
   updateProfile: async (req, res) => {
     var tokenData = res.locals.user;
@@ -175,7 +327,19 @@ const profileMiddleware = {
     var tokenData = res.locals.user;
     const { statusCode, ...rest } = await getProfileData(tokenData);
     res.status(statusCode).send(rest);
-  }
+  },
+  getAllUsers: async (req, res) => {
+    const { statusCode, ...rest } = await getAllUsers(req, res);
+    res.status(statusCode).send(rest);
+  },
+  deleteUserData: async (req, res) => {
+    const { statusCode, ...rest } = await deleteUserData(req, res);
+    res.status(statusCode).send(rest);
+  },
+  getUserRoles: async (req, res) => {
+    const { statusCode, ...rest } = await getUserRoles(req, res);
+    res.status(statusCode).send(rest);
+  },
 };
 
 module.exports = profileMiddleware;
